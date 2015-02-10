@@ -13,15 +13,44 @@ var elasticSearchClient = new elasticsearch.Client({
 });
 var router = express.Router();
 var CrawlerEngine = {};
+CrawlerEngine.indexTweet = function(tweet){
+	var tweetDocument = {
+    	id:tweet.id,
+    	text:tweet.text,
+    	timestamp_ms:tweet.timestamp_ms,
+    	user:{
+    		id:tweet.user.id,
+    		name:tweet.user.name,
+    		screen_name:tweet.user.screen_name,
+    		location:tweet.user.location,
+    		description:tweet.user.description,
+    		followers_count:tweet.user.followers_count,
+    		favourites_count:tweet.user.favourites_count,
+    		statuses_count:tweet.user.statuses_count,
+    		profile_background_image_url:tweet.user.profile_background_image_url
+    	},
+    	keywords:tweet.$keywords
+    }
+    try{
+		elasticSearchClient.create({
+			index: 'twitter',
+			type: 'posts',
+			body: tweetDocument
+		}, function (error, response) {
+			  	
+		});
+	} catch(ex){
+		console.log(ex);
+	}
+}
 CrawlerEngine.listenToTwitter= function(){
 	try {
 		var stream = twitterCrawler.streamChannels({track:twitterCrawler.keywords});
 		console.log('stream invoked');
 		twitterCrawler.currentStream = stream;
 		stream.on('channels', function(tweet) {
-		    console.log(tweet.text);
-		  });
-
+			CrawlerEngine.indexTweet(tweet);
+		});
 		stream.on('error', function(error) {
 		    console.log(error);
 		});
@@ -105,12 +134,7 @@ router.delete('/delete', function(req, res) {
 });
 /* list existing crawlers */
 router.get('/list', function(req, res) {
-	
-  	res.send('list', { title: 'Express' });
-	/**
-	 * Stream statuses filtered by keyword
-	 * number of tweets per second depends on topic popularity
-	 **/
+	res.send('list', { title: 'Express' });
 });
 
 module.exports = router;
