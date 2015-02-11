@@ -88,9 +88,9 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
-setInterval(function () {
-  console.log(process.memoryUsage().rss)
-  if (typeof gc === 'function') {
-    gc()
-  }
-}, 2000)
+// setInterval(function () {
+//   console.log(process.memoryUsage().rss)
+//   if (typeof gc === 'function') {
+//     gc()
+//   }
+// }, 2000)

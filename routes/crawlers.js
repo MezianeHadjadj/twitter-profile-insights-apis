@@ -96,7 +96,7 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
