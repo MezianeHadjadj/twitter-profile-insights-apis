@@ -18,7 +18,7 @@ CrawlerEngine.indexTweet = function(tweet){
 	var tweetDocument = {
     	id:tweet.id,
     	text:tweet.text,
-    	timestamp_ms:tweet.timestamp_ms,
+    	created_at:tweet.created_at,
     	retweet_count:tweet.retweet_count,
     	favorite_count:tweet.favorite_count,
     	user:{
@@ -162,7 +162,7 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers

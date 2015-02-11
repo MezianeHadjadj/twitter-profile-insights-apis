@@ -50,6 +50,7 @@ router.get('/list', function(req, res) {
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  size: req.query.limit,
+		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
 		  q: 'keywords: '+q
