@@ -7,6 +7,7 @@ var twitterCrawler = new TwitterStreamChannels({
   access_token_secret: 'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
 });
 var elasticsearch = require('elasticsearch');
+var Twitter = require('node-twitter');
 var elasticSearchClient = new elasticsearch.Client({
 	host: '104.154.66.240:9200',
 	log: 'trace'
@@ -18,6 +19,8 @@ CrawlerEngine.indexTweet = function(tweet){
     	id:tweet.id,
     	text:tweet.text,
     	timestamp_ms:tweet.timestamp_ms,
+    	retweet_count:tweet.retweet_count,
+    	favorite_count:tweet.favorite_count,
     	user:{
     		id:tweet.user.id,
     		name:tweet.user.name,
@@ -27,7 +30,7 @@ CrawlerEngine.indexTweet = function(tweet){
     		followers_count:tweet.user.followers_count,
     		favourites_count:tweet.user.favourites_count,
     		statuses_count:tweet.user.statuses_count,
-    		profile_background_image_url:tweet.user.profile_background_image_url
+    		profile_image_url:tweet.user.profile_image_url
     	},
     	keywords:tweet.$keywords
     }
@@ -58,6 +61,68 @@ CrawlerEngine.listenToTwitter= function(){
 		console.log(ex);
 	}
 }
+CrawlerEngine.searchOnTwitter=function(keyword){
+	
+
+	var twitterSearchClient = new Twitter.SearchClient(
+    'n4h3onsHHB6B9MdiPTbuU3zvf',
+    'Hugy2DD3kZXvAVg2MFXIL2506Rzk1qiRIPvGbuvnZVWkywxC2N',
+    '1157418127-VdrrfNdZi3hXs7GqSrRRHbplY2bZUqe388gFBQ2',
+    'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
+);
+twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
+    if (error)
+    {
+        console.log('Error: ' + (error.code ? error.code + ' ' + error.message : error.message));
+    }
+ 
+    if (result)
+    {
+    	//result=JSON.stringify(result)
+		      for(var i=0, length=result["statuses"].length;i<length;i++){
+		      			tweet=result["statuses"][i];
+					      	var tweetDocument = {
+					      	from:"Search API",
+					    	id:tweet.id,
+					    	text:tweet.text,
+					    	retweet_count:tweet.retweet_count,
+					    	favorite_count:tweet.favorite_count,
+					    	timestamp_ms:tweet.created_at,
+					    	user:{
+					    		id:tweet.user.id,
+					    		name:tweet.user.name,
+					    		screen_name:tweet.user.screen_name,
+					    		location:tweet.user.location,
+					    		description:tweet.user.description,
+					    		followers_count:tweet.user.followers_count,
+					    		friends_count:tweet.user.friends_count,
+					    		favourites_count:tweet.user.favourites_count,
+					    		time_zone:tweet.user.time_zone,
+					    		language:tweet.user.lang,
+					    		statuses_count:tweet.user.statuses_count,
+					    		profile_image_url:tweet.user.profile_image_url
+					    	},
+					    	keywords:[keyword]
+					    }
+					    console.log("dddddddzes"+JSON.stringify(tweetDocument));
+					    try{
+							elasticSearchClient.create({
+								index: 'twitter',
+								type: 'posts',
+								body: tweetDocument
+							}, function (error, response) {
+								  	
+							});
+						} catch(ex){
+							
+						}
+
+		      }
+
+    }
+});
+
+}
 CrawlerEngine.insertCrawler =function(crawler){
 	try{
 		elasticSearchClient.create({
@@ -65,7 +130,8 @@ CrawlerEngine.insertCrawler =function(crawler){
 			type: 'crawlers',
 			body: {
 			    keyword: crawler.keyword,
-			    machine: '127.0.0.1'
+			    machine: '127.0.0.1',
+			    organization:crawler.organization
 			}
 		}, function (error, response) {
 		  	
@@ -109,18 +175,19 @@ router.get('/insert', function(req, res) {
 		    if (twitterCrawler.keywords['keywords'].indexOf(req.query.keyword) == -1){
 		    	twitterCrawler.keywords['keywords'].push(req.query.keyword);
 		    	// index the crawler for the requested keyword
-		    	CrawlerEngine.insertCrawler({keyword:req.query.keyword});
+		    	CrawlerEngine.insertCrawler({keyword:req.query.keyword,organization:req.query.organization});
 		    	if(twitterCrawler.currentStream){
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
 				CrawlerEngine.listenToTwitter();
+				CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
 		    	console.log('this keyword exist');
 		    }
 		}, function (err) {
-		    console.trace(err.message);
+		    //console.trace(err.message);
 		});
   	res.send('insert', { title: 'Express' });
 });
@@ -136,6 +203,7 @@ router.delete('/delete', function(req, res) {
 router.get('/list', function(req, res) {
 	res.send('list', { title: 'Express' });
 });
+
 
 module.exports = router;
 	
