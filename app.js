@@ -7,7 +7,7 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var crawlers = require('./routes/crawlers');
-
+var posts = require('./routes/posts');
 var app = express();
 
 // view engine setup
@@ -24,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/twitter/crawlers', crawlers);
+app.use('/twitter/posts', posts);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
