@@ -82,7 +82,7 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
 		      			tweet=result["statuses"][i];
 					      	var tweetDocument = {
-					      	from:"Search API",
+					      	
 					    	id:tweet.id,
 					    	text:tweet.text,
 					    	retweet_count:tweet.retweet_count,
@@ -104,7 +104,6 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 					    	},
 					    	keywords:[keyword]
 					    }
-					    console.log("dddddddzes"+JSON.stringify(tweetDocument));
 					    try{
 							elasticSearchClient.create({
 								index: 'twitter',
@@ -196,8 +195,58 @@ router.put('/update', function(req, res) {
   res.send('update', { title: 'Express' });
 });
 /* delete existing crawler */
-router.delete('/delete', function(req, res) {
-  res.send('delete', { title: 'Express' });
+router.get('/delete', function(req, res) {
+	keyword=req.query.keyword;
+	elasticSearchClient.deleteByQuery({
+	  index: 'twitter',
+	 body: {
+    query: {
+      term: { keyword: keyword }
+    }
+  }
+	}, function (error, response) {
+	  console.log(error+response);
+	});
+
+		elasticSearchClient.search({
+		  index: 'twitter',
+		  type: 'posts',
+		  
+		  q: 'keywords: '+keyword
+		}).then(function (resp) {
+			
+			
+			//console.log("dersssssssssssssssss"+resp.hits.hits);
+			results=resp.hits.hits;
+				for(var i=0, length=results.length;i<length;i++){
+					
+					  elasticSearchClient.delete({
+					  index: 'twitter',
+					  type: 'posts',
+					  id: results[i]._id
+					}, function (error, response) {
+					  // ...
+					});
+				}
+			 res.send('update', { title: 'Deleted' });
+		}, function (err) {
+		     console.trace(err.message);
+		});
+
+
+
+
+	// elasticSearchClient.search({
+	// 	  index: 'twitter',
+	// 	  type: 'crawlers'
+	// 	}).then(function (resp) {
+	// 	    var currentKeywords = CrawlerEngine.extractExistingKeywords(resp.hits.hits);
+	// 	    console.log(currentKeywords);
+	// 	}, function (err) {
+	// 	    //console.trace(err.message);
+	// 	});
+
+  res.send('delete_crawler', { title: 'Express' });
 });
 /* list existing crawlers */
 router.get('/list', function(req, res) {
