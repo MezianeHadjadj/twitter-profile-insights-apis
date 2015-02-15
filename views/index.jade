@@ -1,5 +1,15 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+
+  h1= "List of crawlers"
+  a= "Keyword_______Nbr Tweets_______Delete" 
+  p="------------------------------"
+  each crawler in crawlers
+    a= crawler["key"]
+    a= ":_________:" 
+    a= crawler["doc_count"]
+    a= ":_________:" 
+    a(href="http://localhost:3000/twitter/crawlers/delete?keyword="+crawler["key"] target="_blank") Delete
+    
+    p= "###############################"

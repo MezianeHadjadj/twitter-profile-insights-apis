@@ -15,8 +15,9 @@ var elasticSearchClient = new elasticsearch.Client({
 var router = express.Router();
 var CrawlerEngine = {};
 CrawlerEngine.indexTweet = function(tweet){
+	
 	var tweetDocument = {
-    	id:tweet.id,
+    	id:tweet.id_str,
     	text:tweet.text,
     	created_at:tweet.created_at,
     	retweet_count:tweet.retweet_count,
@@ -80,10 +81,13 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     {
     	//result=JSON.stringify(result)
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
+
 		      			tweet=result["statuses"][i];
+		      			console.log(tweet);
+		      			
 					      	var tweetDocument = {
 					      	
-					    	id:tweet.id,
+					    	id:tweet.id_str,
 					    	text:tweet.text,
 					    	retweet_count:tweet.retweet_count,
 					    	favorite_count:tweet.favorite_count,
@@ -161,7 +165,7 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
@@ -180,7 +184,7 @@ router.get('/insert', function(req, res) {
 				}
 				// Start the crawling job
 				CrawlerEngine.listenToTwitter();
-				CrawlerEngine.searchOnTwitter(req.query.keyword);
+				//CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
 		    	console.log('this keyword exist');
@@ -196,46 +200,54 @@ router.put('/update', function(req, res) {
 });
 /* delete existing crawler */
 router.get('/delete', function(req, res) {
+
 	keyword=req.query.keyword;
-	elasticSearchClient.deleteByQuery({
-	  index: 'twitter',
-	 body: {
-    query: {
-      term: { keyword: keyword }
-    }
-  }
-	}, function (error, response) {
-	  console.log(error+response);
-	});
-
-		elasticSearchClient.search({
+		//delete crawler
+		
+		elasticSearchClient.deleteByQuery({
 		  index: 'twitter',
-		  type: 'posts',
-		  
-		  q: 'keywords: '+keyword
-		}).then(function (resp) {
+		  type: 'crawlers',
+		  q: 'keyword: '+keyword
+		 // body: {
+	  //   query: {
+	  //     term: { keyword: keyword }
+	  //   }
+	  // }
+		}) .then(function (resp) {
+			twitterCrawler.currentStream.stop();
+			setTimeout(function(){ CrawlerEngine.launchCrawlers(); }, 3000);
 			
-			
-			//console.log("dersssssssssssssssss"+resp.hits.hits);
-			results=resp.hits.hits;
-				for(var i=0, length=results.length;i<length;i++){
-					
-					  elasticSearchClient.delete({
-					  index: 'twitter',
-					  type: 'posts',
-					  id: results[i]._id
-					}, function (error, response) {
-					  // ...
-					});
-				}
-			 res.send('update', { title: 'Deleted' });
-		}, function (err) {
-		     console.trace(err.message);
+				console.log("yesss");
+	},function (error, response) {
+		  console.log("erorr:"+error+JSON.stringify(response));
 		});
+		var siz=1;
+		elasticSearchClient.count({
+			  index: 'twitter',
+			  type:'posts',
+			  q: 'keywords: '+keyword
+			}, function (error, response) {
+			  console.log("sizzzzzzzz:"+response["count"]);
+			  siz=siz+response["count"]/50;
+
+			  elasticSearchClient.deleteByQuery({
+					  index: 'twitter',
+					  type:'posts',
+			 		 q: 'keywords: '+keyword
+					}, function (error, response) {
+					  console.log("###########"+error);
+					});
+			  
+
+				res.send('update', { title: 'Deleted' });
 
 
 
+			});
+		
 
+		
+		
 	// elasticSearchClient.search({
 	// 	  index: 'twitter',
 	// 	  type: 'crawlers'
@@ -246,11 +258,55 @@ router.get('/delete', function(req, res) {
 	// 	    //console.trace(err.message);
 	// 	});
 
-  res.send('delete_crawler', { title: 'Express' });
 });
+router.get('/crawlers', function(req, res) {
+
+elasticSearchClient.search({
+		  index: 'twitter',
+		  type: 'crawlers',
+		  size: 100
+		}).then(function (resp) {
+			res.send('update', JSON.stringify(resp.hits.hits));
+			
+		}, function (err) {
+		     console.trace(err.message);
+		});
+
+		});
+
+
 /* list existing crawlers */
 router.get('/list', function(req, res) {
-	res.send('list', { title: 'Express' });
+	
+
+		elasticSearchClient.search({
+					  index: 'twitter',
+					  
+					  type: 'posts',
+					  body: {
+
+					aggs: {
+			                touchdowns: {
+			                    terms: {
+			                    	size:400,
+			                        field: "keywords",
+			                        // order by quarter, ascending
+			                        order: { "_term" : "asc" }
+			                    }
+			                }
+			            }
+			           }
+					}).then(function (resp) {
+						var crawlers=resp.aggregations.touchdowns.buckets;
+						res.render('index', { crawlers: crawlers});
+					}, function (err) {
+					     console.trace(err.message);
+					});
+
+
+
+		
+	//res.send('list', { title: 'Express' });
 });
 
 
