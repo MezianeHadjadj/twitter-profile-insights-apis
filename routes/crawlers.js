@@ -91,7 +91,7 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 					    	text:tweet.text,
 					    	retweet_count:tweet.retweet_count,
 					    	favorite_count:tweet.favorite_count,
-					    	timestamp_ms:tweet.created_at,
+					    	created_at:tweet.created_at,
 					    	user:{
 					    		id:tweet.user.id,
 					    		name:tweet.user.name,
