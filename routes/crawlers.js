@@ -16,7 +16,8 @@ var router = express.Router();
 var CrawlerEngine = {};
 CrawlerEngine.indexTweet = function(tweet){
 	var tweetDocument = {
-    	id:tweet.id,
+		from: "Stream",
+    	id:tweet.id_str,
     	text:tweet.text,
     	created_at:tweet.created_at,
     	retweet_count:tweet.retweet_count,
@@ -80,42 +81,71 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     {
     	//result=JSON.stringify(result)
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
-		      	
 		      			tweet=result["statuses"][i];
-					      	var tweetDocument = {
+
+
+
+		      					elasticSearchClient.search({
+								  index: 'twitter',
+								  size: 1,
+								  type: 'posts',
+								  q: 'id: '+tweet.id_str
+									}).then(function (resp) {
+										if( (resp.hits.hits).length==0) {
+											var tweetDocument = {
+					      				from:"Search",
+								    	id:tweet.id,
+								    	text:tweet.text,
+								    	retweet_count:tweet.retweet_count,
+								    	favorite_count:tweet.favorite_count,
+								    	timestamp_ms:tweet.created_at,
+								    	user:{
+								    		id:tweet.user.id,
+								    		name:tweet.user.name,
+								    		screen_name:tweet.user.screen_name,
+								    		location:tweet.user.location,
+								    		description:tweet.user.description,
+								    		followers_count:tweet.user.followers_count,
+								    		friends_count:tweet.user.friends_count,
+								    		favourites_count:tweet.user.favourites_count,
+								    		time_zone:tweet.user.time_zone,
+								    		language:tweet.user.lang,
+								    		statuses_count:tweet.user.statuses_count,
+								    		profile_image_url:tweet.user.profile_image_url
+								    	},
+								    	keywords:[keyword]
+								    }
+								    try{
+										elasticSearchClient.create({
+											index: 'twitter',
+											type: 'posts',
+											body: tweetDocument
+										}, function (error, response) {
+											  	
+										});
+									} catch(ex){
+										
+									}
+
+		      							}else{
+											console.log("exist");
+										}
+										 
+									}, function (err) {
+									     console.trace(err.message);
+									});
+
+
+
+
+
+
 					      	
-					    	id:tweet.id,
-					    	text:tweet.text,
-					    	retweet_count:tweet.retweet_count,
-					    	favorite_count:tweet.favorite_count,
-					    	timestamp_ms:tweet.created_at,
-					    	user:{
-					    		id:tweet.user.id,
-					    		name:tweet.user.name,
-					    		screen_name:tweet.user.screen_name,
-					    		location:tweet.user.location,
-					    		description:tweet.user.description,
-					    		followers_count:tweet.user.followers_count,
-					    		friends_count:tweet.user.friends_count,
-					    		favourites_count:tweet.user.favourites_count,
-					    		time_zone:tweet.user.time_zone,
-					    		language:tweet.user.lang,
-					    		statuses_count:tweet.user.statuses_count,
-					    		profile_image_url:tweet.user.profile_image_url
-					    	},
-					    	keywords:[keyword]
-					    }
-					    try{
-							elasticSearchClient.create({
-								index: 'twitter',
-								type: 'posts',
-								body: tweetDocument
-							}, function (error, response) {
-								  	
-							});
-						} catch(ex){
-							
-						}
+
+
+
+
+
 
 		      }
 
@@ -162,7 +192,7 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
