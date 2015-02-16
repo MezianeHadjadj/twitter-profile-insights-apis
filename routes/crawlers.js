@@ -53,7 +53,21 @@ CrawlerEngine.listenToTwitter= function(){
 		console.log('stream invoked');
 		twitterCrawler.currentStream = stream;
 		stream.on('channels', function(tweet) {
-			CrawlerEngine.indexTweet(tweet);
+			  //test if tweet d'ont exist
+			  elasticSearchClient.search({
+			  index: 'twitter',
+			  size: 1,
+			  type: 'posts',
+			  q: 'id: '+tweet.id_str
+				}).then(function (resp) {
+					if( (resp.hits.hits).length==0) {
+						CrawlerEngine.indexTweet(tweet);
+					}
+					 
+				}, function (err) {
+				     console.trace(err.message);
+				});
+			
 		});
 		stream.on('error', function(error) {
 		    console.log(error);
@@ -85,40 +99,58 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 		      			tweet=result["statuses"][i];
 		      			console.log(tweet);
 		      			
-					      	var tweetDocument = {
 					      	
-					    	id:tweet.id_str,
-					    	text:tweet.text,
-					    	retweet_count:tweet.retweet_count,
-					    	favorite_count:tweet.favorite_count,
-					    	created_at:tweet.created_at,
-					    	user:{
-					    		id:tweet.user.id,
-					    		name:tweet.user.name,
-					    		screen_name:tweet.user.screen_name,
-					    		location:tweet.user.location,
-					    		description:tweet.user.description,
-					    		followers_count:tweet.user.followers_count,
-					    		friends_count:tweet.user.friends_count,
-					    		favourites_count:tweet.user.favourites_count,
-					    		time_zone:tweet.user.time_zone,
-					    		language:tweet.user.lang,
-					    		statuses_count:tweet.user.statuses_count,
-					    		profile_image_url:tweet.user.profile_image_url
-					    	},
-					    	keywords:[keyword]
-					    }
-					    try{
-							elasticSearchClient.create({
-								index: 'twitter',
-								type: 'posts',
-								body: tweetDocument
-							}, function (error, response) {
-								  	
-							});
-						} catch(ex){
-							
-						}
+
+					    		//test if tweet d'ont exist
+								  elasticSearchClient.search({
+								  index: 'twitter',
+								  size: 1,
+								  type: 'posts',
+								  q: 'id: '+tweet.id_str
+									}).then(function (resp) {
+										if( (resp.hits.hits).length==0) {
+											var tweetDocument = {
+									    	id:tweet.id_str,
+									    	text:tweet.text,
+									    	retweet_count:tweet.retweet_count,
+									    	favorite_count:tweet.favorite_count,
+									    	created_at:tweet.created_at,
+									    	user:{
+									    		id:tweet.user.id,
+									    		name:tweet.user.name,
+									    		screen_name:tweet.user.screen_name,
+									    		location:tweet.user.location,
+									    		description:tweet.user.description,
+									    		followers_count:tweet.user.followers_count,
+									    		friends_count:tweet.user.friends_count,
+									    		favourites_count:tweet.user.favourites_count,
+									    		time_zone:tweet.user.time_zone,
+									    		language:tweet.user.lang,
+									    		statuses_count:tweet.user.statuses_count,
+									    		profile_image_url:tweet.user.profile_image_url
+									    	},
+									    	keywords:[keyword]
+									    }
+											try{
+												elasticSearchClient.create({
+													index: 'twitter',
+													type: 'posts',
+													body: tweetDocument
+												}, function (error, response) {
+													  	
+												});
+											} catch(ex){
+												
+											}
+										
+										}else{
+											console.log("exist");
+										}
+										 
+									}, function (err) {
+									     console.trace(err.message);
+									});
+							    
 
 		      }
 
@@ -165,7 +197,7 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
@@ -184,7 +216,7 @@ router.get('/insert', function(req, res) {
 				}
 				// Start the crawling job
 				CrawlerEngine.listenToTwitter();
-				//CrawlerEngine.searchOnTwitter(req.query.keyword);
+				CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
 		    	console.log('this keyword exist');
