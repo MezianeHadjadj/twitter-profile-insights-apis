@@ -106,7 +106,7 @@ CrawlerEngine.insertTweet =function(tweet,keyword){
 										if( (resp.hits.hits).length==0) {
 											var tweetDocument = {
 					      				from:"Search",
-								    	id:tweet.id,
+								    	id:tweet.id_str,
 								    	date_of_storage : new Date(),
 								    	text:tweet.text,
 								    	retweet_count:tweet.retweet_count,
@@ -189,7 +189,7 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
@@ -207,7 +207,7 @@ router.get('/insert', function(req, res) {
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				//CrawlerEngine.listenToTwitter();
+				CrawlerEngine.listenToTwitter();
 				CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
