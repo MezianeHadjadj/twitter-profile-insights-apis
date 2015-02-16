@@ -15,8 +15,11 @@ var elasticSearchClient = new elasticsearch.Client({
 var router = express.Router();
 var CrawlerEngine = {};
 CrawlerEngine.indexTweet = function(tweet){
+	
 	var tweetDocument = {
-    	id:tweet.id,
+		from: "Stream",
+    	id:tweet.id_str,
+    	date_of_storage :new Date(),
     	text:tweet.text,
     	created_at:tweet.created_at,
     	retweet_count:tweet.retweet_count,
@@ -81,41 +84,11 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     	//result=JSON.stringify(result)
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
 		      			tweet=result["statuses"][i];
-					      	var tweetDocument = {
-					      	from:"Search API",
-					    	id:tweet.id,
-					    	text:tweet.text,
-					    	retweet_count:tweet.retweet_count,
-					    	favorite_count:tweet.favorite_count,
-					    	created_at:tweet.created_at,
-					    	user:{
-					    		id:tweet.user.id,
-					    		name:tweet.user.name,
-					    		screen_name:tweet.user.screen_name,
-					    		location:tweet.user.location,
-					    		description:tweet.user.description,
-					    		followers_count:tweet.user.followers_count,
-					    		friends_count:tweet.user.friends_count,
-					    		favourites_count:tweet.user.favourites_count,
-					    		time_zone:tweet.user.time_zone,
-					    		language:tweet.user.lang,
-					    		statuses_count:tweet.user.statuses_count,
-					    		profile_image_url:tweet.user.profile_image_url
-					    	},
-					    	keywords:[keyword]
-					    }
-					    console.log("dddddddzes"+JSON.stringify(tweetDocument));
-					    try{
-							elasticSearchClient.create({
-								index: 'twitter',
-								type: 'posts',
-								body: tweetDocument
-							}, function (error, response) {
-								  	
-							});
-						} catch(ex){
-							
-						}
+
+
+
+    	      					CrawlerEngine.insertTweet(tweet,keyword);
+
 
 		      }
 
@@ -123,6 +96,60 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 });
 
 }
+CrawlerEngine.insertTweet =function(tweet,keyword){
+	elasticSearchClient.search({
+								  index: 'twitter',
+								  size: 1,
+								  type: 'posts',
+								  q: 'id: '+tweet.id_str
+									}).then(function (resp) {
+										if( (resp.hits.hits).length==0) {
+											var tweetDocument = {
+					      				from:"Search",
+								    	id:tweet.id_str,
+								    	date_of_storage : new Date(),
+								    	text:tweet.text,
+								    	retweet_count:tweet.retweet_count,
+								    	favorite_count:tweet.favorite_count,
+								    	timestamp_ms:tweet.created_at,
+								    	user:{
+								    		id:tweet.user.id,
+								    		name:tweet.user.name,
+								    		screen_name:tweet.user.screen_name,
+								    		location:tweet.user.location,
+								    		description:tweet.user.description,
+								    		followers_count:tweet.user.followers_count,
+								    		friends_count:tweet.user.friends_count,
+								    		favourites_count:tweet.user.favourites_count,
+								    		time_zone:tweet.user.time_zone,
+								    		language:tweet.user.lang,
+								    		statuses_count:tweet.user.statuses_count,
+								    		profile_image_url:tweet.user.profile_image_url
+								    	},
+								    	keywords:[keyword]
+								    }
+								    try{
+										elasticSearchClient.create({
+											index: 'twitter',
+											type: 'posts',
+											body: tweetDocument
+										}, function (error, response) {
+											  	
+										});
+									} catch(ex){
+										
+									}
+
+		      							}else{
+											console.log("exist");
+										}
+										 
+									}, function (err) {
+									     console.trace(err.message);
+									});
+
+}
+
 CrawlerEngine.insertCrawler =function(crawler){
 	try{
 		elasticSearchClient.create({
@@ -197,12 +224,116 @@ router.put('/update', function(req, res) {
   res.send('update', { title: 'Express' });
 });
 /* delete existing crawler */
-router.delete('/delete', function(req, res) {
-  res.send('delete', { title: 'Express' });
+router.get('/delete', function(req, res) {
+
+	keyword=req.query.keyword;
+		//delete crawler
+		
+		elasticSearchClient.deleteByQuery({
+		  index: 'twitter',
+		  type: 'crawlers',
+		  q: 'keyword: '+keyword
+		 // body: {
+	  //   query: {
+	  //     term: { keyword: keyword }
+	  //   }
+	  // }
+		}) .then(function (resp) {
+			twitterCrawler.currentStream.stop();
+			setTimeout(function(){ CrawlerEngine.launchCrawlers(); }, 3000);
+			
+				console.log("yesss");
+	},function (error, response) {
+		  console.log("erorr:"+error+JSON.stringify(response));
+		});
+		var siz=1;
+		elasticSearchClient.count({
+			  index: 'twitter',
+			  type:'posts',
+			  q: 'keywords: '+keyword
+			}, function (error, response) {
+			  console.log("sizzzzzzzz:"+response["count"]);
+			  siz=siz+response["count"]/50;
+
+			  elasticSearchClient.deleteByQuery({
+					  index: 'twitter',
+					  type:'posts',
+			 		 q: 'keywords: '+keyword
+					}, function (error, response) {
+					  console.log("###########"+error);
+					});
+			  
+
+				res.send('update', { title: 'Deleted' });
+
+
+
+			});
+		
+
+		
+		
+	// elasticSearchClient.search({
+	// 	  index: 'twitter',
+	// 	  type: 'crawlers'
+	// 	}).then(function (resp) {
+	// 	    var currentKeywords = CrawlerEngine.extractExistingKeywords(resp.hits.hits);
+	// 	    console.log(currentKeywords);
+	// 	}, function (err) {
+	// 	    //console.trace(err.message);
+	// 	});
+
 });
+router.get('/crawlers', function(req, res) {
+
+elasticSearchClient.search({
+		  index: 'twitter',
+		  type: 'crawlers',
+		  size: 100
+		}).then(function (resp) {
+			console.log("crrrrrrrrrrrrrrrrr"+JSON.stringify(resp.hits.hits));
+			res.send('update', JSON.stringify(resp.hits.hits));
+			
+		}, function (err) {
+		     console.trace(err.message);
+		});
+
+		});
+
+
 /* list existing crawlers */
 router.get('/list', function(req, res) {
-	res.send('list', { title: 'Express' });
+	
+
+		elasticSearchClient.search({
+					  index: 'twitter',
+					  
+					  type: 'posts',
+					  body: {
+
+					aggs: {
+			                touchdowns: {
+			                    terms: {
+			                    	size:400,
+			                        field: "keywords",
+			                        // order by quarter, ascending
+			                        order: { "_term" : "asc" }
+			                    }
+			                }
+			            }
+			           }
+					}).then(function (resp) {
+						console.log("rsppppppppppppp"+JSON.stringify(resp.aggregations.touchdowns.buckets[0]["key"]))
+						var crawlers=resp.aggregations.touchdowns.buckets;
+						res.render('index', { crawlers: crawlers});
+					}, function (err) {
+					     console.trace(err.message);
+					});
+
+
+
+		
+	//res.send('list', { title: 'Express' });
 });
 
 
