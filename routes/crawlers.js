@@ -15,9 +15,11 @@ var elasticSearchClient = new elasticsearch.Client({
 var router = express.Router();
 var CrawlerEngine = {};
 CrawlerEngine.indexTweet = function(tweet){
+	
 	var tweetDocument = {
 		from: "Stream",
     	id:tweet.id_str,
+    	date_of_storage :new Date(),
     	text:tweet.text,
     	created_at:tweet.created_at,
     	retweet_count:tweet.retweet_count,
@@ -85,7 +87,17 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 
 
 
-		      					elasticSearchClient.search({
+    	      					CrawlerEngine.insertTweet(tweet,keyword);
+
+
+		      }
+
+    }
+});
+
+}
+CrawlerEngine.insertTweet =function(tweet,keyword){
+	elasticSearchClient.search({
 								  index: 'twitter',
 								  size: 1,
 								  type: 'posts',
@@ -95,6 +107,7 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 											var tweetDocument = {
 					      				from:"Search",
 								    	id:tweet.id,
+								    	date_of_storage : new Date(),
 								    	text:tweet.text,
 								    	retweet_count:tweet.retweet_count,
 								    	favorite_count:tweet.favorite_count,
@@ -135,24 +148,8 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 									     console.trace(err.message);
 									});
 
-
-
-
-
-
-					      	
-
-
-
-
-
-
-		      }
-
-    }
-});
-
 }
+
 CrawlerEngine.insertCrawler =function(crawler){
 	try{
 		elasticSearchClient.create({
@@ -192,7 +189,7 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
@@ -210,7 +207,7 @@ router.get('/insert', function(req, res) {
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				CrawlerEngine.listenToTwitter();
+				//CrawlerEngine.listenToTwitter();
 				CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
