@@ -24,6 +24,7 @@ CrawlerEngine.indexTweet = function(tweet){
     	created_at:tweet.created_at,
     	retweet_count:tweet.retweet_count,
     	favorite_count:tweet.favorite_count,
+    	language: tweet.lang,
     	user:{
     		id:tweet.user.id,
     		name:tweet.user.name,
@@ -55,6 +56,7 @@ CrawlerEngine.listenToTwitter= function(){
 		console.log('stream invoked');
 		twitterCrawler.currentStream = stream;
 		stream.on('channels', function(tweet) {
+			
 			CrawlerEngine.indexTweet(tweet);
 		});
 		stream.on('error', function(error) {
@@ -82,10 +84,11 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     if (result)
     {
     	//result=JSON.stringify(result)
+
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
 		      			tweet=result["statuses"][i];
-
-
+		      			console.log("################"+JSON.stringify(tweet.metadata["iso_language_code"]));
+		      					
 
     	      					CrawlerEngine.insertTweet(tweet,keyword);
 
@@ -112,6 +115,7 @@ CrawlerEngine.insertTweet =function(tweet,keyword){
 								    	retweet_count:tweet.retweet_count,
 								    	favorite_count:tweet.favorite_count,
 								    	created_at:tweet.created_at,
+								    	language: tweet.metadata["iso_language_code"],
 								    	user:{
 								    		id:tweet.user.id,
 								    		name:tweet.user.name,
@@ -189,8 +193,10 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-CrawlerEngine.insertCrawler({keyword:'iogrow'});
-// CrawlerEngine.launchCrawlers();
+
+CrawlerEngine.launchCrawlers();
+
+
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
@@ -252,7 +258,6 @@ router.get('/delete', function(req, res) {
 			  type:'posts',
 			  q: 'keywords: '+keyword
 			}, function (error, response) {
-			  console.log("sizzzzzzzz:"+response["count"]);
 			  siz=siz+response["count"]/50;
 
 			  elasticSearchClient.deleteByQuery({
@@ -291,15 +296,39 @@ elasticSearchClient.search({
 		  type: 'crawlers',
 		  size: 100
 		}).then(function (resp) {
-			console.log("crrrrrrrrrrrrrrrrr"+JSON.stringify(resp.hits.hits));
-			res.send('update', JSON.stringify(resp.hits.hits));
+			results=resp.hits.hits;
+		var crawlers=[];
+		var finish=false;
+		for(var i=0, length=results.length;i<length;i++){
+			if (i+1==length){
+				finish=true;
+			}
+			CrawlerEngine.count_tweets(crawlers,results[i]["_source"]["keyword"],res,finish);	
+			
+		}
+			//res.render('index', { crawlers: crawlers});
+			//res.send('update', JSON.stringify(crawlers));
 			
 		}, function (err) {
-		     console.trace(err.message);
+		    // console.trace(err.message);
 		});
 
 		});
 
+CrawlerEngine.count_tweets=function(crawlers,keyword,res,finish){
+		elasticSearchClient.count({
+			  index: 'twitter',
+			  type:'posts',
+			  q: 'keywords: '+keyword
+			}, function (error, response) {
+			  
+			  crawlers.push({"keyword":keyword,"number_of_posts":response["count"]});
+				if (finish){
+					res.render('crawlers', { crawlers: crawlers});
+				}	
+			
+			});
+}
 
 /* list existing crawlers */
 router.get('/list', function(req, res) {
