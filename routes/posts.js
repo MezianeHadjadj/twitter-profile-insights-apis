@@ -33,7 +33,7 @@ router.get('/tweet_details', function(req, res) {
 router.get('/list', function(req, res) {
 	
 	//var result=ParserEngine.listTweets(params);
-	console.log(req.query.keywords);
+	console.log(req.query.keywords+"zzzzzzzzzzzz");
 	console.log(typeof req.query.keywords);
 	var from=(req.query.page-1)*req.query.limit;
 // list tweets from elasticsearch nodes
@@ -45,7 +45,7 @@ router.get('/list', function(req, res) {
 			}
 			
 	var more=true;
-
+	
 
 	elasticSearchClient.search({
 		  index: 'twitter',
@@ -53,7 +53,10 @@ router.get('/list', function(req, res) {
 		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
-		  q: 'keywords: '+q
+		  q: 'keywords: '+ q,
+	
+
+		 
 		}).then(function (resp) {
 			
 			if (JSON.stringify(resp.hits.total)==0){
