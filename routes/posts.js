@@ -33,28 +33,47 @@ router.get('/tweet_details', function(req, res) {
 router.get('/list', function(req, res) {
 	
 	//var result=ParserEngine.listTweets(params);
-	console.log(req.query.keywords+"zzzzzzzzzzzz");
 	console.log(typeof req.query.keywords);
 	var from=(req.query.page-1)*req.query.limit;
 // list tweets from elasticsearch nodes
+	var language="";
 	var keywords=req.query.keywords;
 	var q=keywords[0];
 			for( var i = 1,length = keywords.length; i < length; i++ ) {
 				
 				q=q+' OR '+keywords[i]
 			}
-			
+			//'language:'+language+' AND keywords: '+q
+	if(req.query.language){
+		query='language:'+req.query.language+' AND keywords: ' +q;
+	}else{
+		query='keywords:'+q;
+	}
 	var more=true;
-	
-
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  size: req.query.limit,
 		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
-		  q: 'keywords: '+ q,
-	
+
+		  q: query,
+		  //q: 'favorite_count: '+ 0,
+
+		   // body: {
+			  //   query: {
+				 //      match: {
+				 //        keywords: q 	  
+				 //      }
+			  //   }
+			  // }
+
+
+		   //'language: ar'
+		  // query_string : {
+    //     fields : ["keywords", "language"],
+    //     query : q+ "AND "+language
+    // 	}
 
 		 
 		}).then(function (resp) {

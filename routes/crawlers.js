@@ -24,6 +24,7 @@ CrawlerEngine.indexTweet = function(tweet){
     	created_at:tweet.created_at,
     	retweet_count:tweet.retweet_count,
     	favorite_count:tweet.favorite_count,
+    	language: tweet.lang,
     	user:{
     		id:tweet.user.id,
     		name:tweet.user.name,
@@ -55,6 +56,7 @@ CrawlerEngine.listenToTwitter= function(){
 		console.log('stream invoked');
 		twitterCrawler.currentStream = stream;
 		stream.on('channels', function(tweet) {
+			
 			CrawlerEngine.indexTweet(tweet);
 		});
 		stream.on('error', function(error) {
@@ -82,10 +84,11 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     if (result)
     {
     	//result=JSON.stringify(result)
+
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
 		      			tweet=result["statuses"][i];
-
-
+		      			console.log("################"+JSON.stringify(tweet.metadata["iso_language_code"]));
+		      					
 
     	      					CrawlerEngine.insertTweet(tweet,keyword);
 
@@ -112,6 +115,7 @@ CrawlerEngine.insertTweet =function(tweet,keyword){
 								    	retweet_count:tweet.retweet_count,
 								    	favorite_count:tweet.favorite_count,
 								    	created_at:tweet.created_at,
+								    	language: tweet.metadata["iso_language_code"],
 								    	user:{
 								    		id:tweet.user.id,
 								    		name:tweet.user.name,
