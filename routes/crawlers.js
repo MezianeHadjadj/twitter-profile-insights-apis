@@ -111,7 +111,7 @@ CrawlerEngine.insertTweet =function(tweet,keyword){
 								    	text:tweet.text,
 								    	retweet_count:tweet.retweet_count,
 								    	favorite_count:tweet.favorite_count,
-								    	timestamp_ms:tweet.created_at,
+								    	created_at:tweet.created_at,
 								    	user:{
 								    		id:tweet.user.id,
 								    		name:tweet.user.name,
@@ -189,7 +189,10 @@ CrawlerEngine.launchCrawlers = function(){
 		     console.trace(err.message);
 	});
 }
-//CrawlerEngine.launchCrawlers();
+
+CrawlerEngine.launchCrawlers();
+
+
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
@@ -207,8 +210,8 @@ router.get('/insert', function(req, res) {
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				//CrawlerEngine.listenToTwitter();
-				//CrawlerEngine.searchOnTwitter(req.query.keyword);
+				CrawlerEngine.listenToTwitter();
+				CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
 		    	console.log('this keyword exist');
@@ -251,7 +254,6 @@ router.get('/delete', function(req, res) {
 			  type:'posts',
 			  q: 'keywords: '+keyword
 			}, function (error, response) {
-			  console.log("sizzzzzzzz:"+response["count"]);
 			  siz=siz+response["count"]/50;
 
 			  elasticSearchClient.deleteByQuery({
@@ -290,7 +292,6 @@ elasticSearchClient.search({
 		  type: 'crawlers',
 		  size: 100
 		}).then(function (resp) {
-			console.log("crrrrrrrrrrrrrrrrr"+JSON.stringify(resp.hits.hits[0]["_source"]["keyword"]));
 			results=resp.hits.hits;
 		var crawlers=[];
 		var finish=false;
