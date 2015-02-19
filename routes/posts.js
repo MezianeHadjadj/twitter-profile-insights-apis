@@ -38,18 +38,29 @@ router.get('/list', function(req, res) {
 // list tweets from elasticsearch nodes
 	var language="";
 	var keywords=req.query.keywords;
-	var q=keywords[0];
-			for( var i = 1,length = keywords.length; i < length; i++ ) {
-				
-				q=q+' OR '+keywords[i]
+	console.log("keee"+keywords);
+	var list=[];
+			for( var i = 0,length = keywords.length; i < length; i++ ) {
+				list =list.concat(keywords[i].split(" "));
+				//q=q+' OR '+keywords[i]
 			}
 			//'language:'+language+' AND keywords: '+q
+
+	var q=list[0];
+			for( var i = 1,length = list.length; i < length; i++ ) {
+				
+				q=q+' OR keywords: '+list[i];
+			}
+
+
+
 	if(req.query.language){
 		query='language:'+req.query.language+' AND keywords: ' +q;
 	}else{
 		query='keywords:'+q;
 	}
 	var more=true;
+
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  size: req.query.limit,
@@ -58,6 +69,7 @@ router.get('/list', function(req, res) {
 		  from: from,
 
 		  q: query,
+		  //q: "keywords: happyfeet OR keywords: long"
 		  //q: 'favorite_count: '+ 0,
 
 		   // body: {

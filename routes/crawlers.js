@@ -75,7 +75,7 @@ CrawlerEngine.searchOnTwitter=function(keyword){
     '1157418127-VdrrfNdZi3hXs7GqSrRRHbplY2bZUqe388gFBQ2',
     'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
 );
-twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
+twitterSearchClient.search({'q': keyword,'count':3}, function(error, result) {
     if (error)
     {
         console.log('Error: ' + (error.code ? error.code + ' ' + error.message : error.message));
@@ -87,9 +87,8 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
 
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
 		      			tweet=result["statuses"][i];
-		      			console.log("################"+JSON.stringify(tweet.metadata["iso_language_code"]));
-		      					
-
+		      			console.log("################"+JSON.stringify(tweet));
+		      			
     	      					CrawlerEngine.insertTweet(tweet,keyword);
 
 
@@ -194,7 +193,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -215,6 +214,7 @@ router.get('/insert', function(req, res) {
 				}
 				// Start the crawling job
 				CrawlerEngine.listenToTwitter();
+				
 				CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
@@ -315,6 +315,27 @@ elasticSearchClient.search({
 
 		});
 
+
+router.get('/deleteelement', function(req, res) {
+	elasticSearchClient.deleteByQuery({
+		  index: '',
+		  //type: 'posts',
+		  q: 'id: 5716616385921024'
+		 // body: {
+	  //   query: {
+	  //     term: { keyword: keyword }
+	  //   }
+	  // }
+		}) .then(function (resp) {
+			console.log(resp);
+			
+				console.log("yesss");
+	},function (error, response) {
+		  console.log("erorr:"+error+JSON.stringify(response));
+		});
+
+
+});
 CrawlerEngine.count_tweets=function(crawlers,keyword,res,finish){
 		elasticSearchClient.count({
 			  index: 'twitter',
