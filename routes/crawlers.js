@@ -193,7 +193,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
