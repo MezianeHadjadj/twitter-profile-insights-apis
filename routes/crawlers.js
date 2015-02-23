@@ -14,6 +14,8 @@ var elasticSearchClient = new elasticsearch.Client({
 });
 var router = express.Router();
 var CrawlerEngine = {};
+//M Hadjadj 15-02-2015
+//insert tweet in elasticsearch 
 CrawlerEngine.indexTweet = function(tweet){
 	
 	var tweetDocument = {
@@ -50,6 +52,8 @@ CrawlerEngine.indexTweet = function(tweet){
 		console.log(ex);
 	}
 }
+//M Hadjadj 15-02-2015
+// Stream api on twitter
 CrawlerEngine.listenToTwitter= function(){
 	try {
 		var stream = twitterCrawler.streamChannels({track:twitterCrawler.keywords});
@@ -193,7 +197,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -213,9 +217,9 @@ router.get('/insert', function(req, res) {
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				CrawlerEngine.listenToTwitter();
+				//CrawlerEngine.listenToTwitter();
 				
-				CrawlerEngine.searchOnTwitter(req.query.keyword);
+				//CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
 		    	console.log('this keyword exist');
@@ -318,9 +322,9 @@ elasticSearchClient.search({
 
 router.get('/deleteelement', function(req, res) {
 	elasticSearchClient.deleteByQuery({
-		  index: '',
-		  //type: 'posts',
-		  q: 'id: 5716616385921024'
+		  index: 'twitter',
+		  type: 'posts',
+		  q: 'id: '+req.query.id
 		 // body: {
 	  //   query: {
 	  //     term: { keyword: keyword }
@@ -330,12 +334,16 @@ router.get('/deleteelement', function(req, res) {
 			console.log(resp);
 			
 				console.log("yesss");
+				res.send('update', { title: 'Deleted' });
 	},function (error, response) {
 		  console.log("erorr:"+error+JSON.stringify(response));
 		});
 
 
 });
+
+
+
 CrawlerEngine.count_tweets=function(crawlers,keyword,res,finish){
 		elasticSearchClient.count({
 			  index: 'twitter',
@@ -386,6 +394,14 @@ router.get('/list', function(req, res) {
 	//res.send('list', { title: 'Express' });
 });
 
+router.get('/stats', function(req, res) {
+	
+elasticSearchClient.count(function (error, response, status) {
+  // check for and handle error
+  var count = response.count;
+  res.send('update', { title: count });
+});
+});
 
 module.exports = router;
 	
