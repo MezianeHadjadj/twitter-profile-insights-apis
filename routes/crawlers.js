@@ -364,7 +364,7 @@ router.get('/crawlers', function(req, res) {
 elasticSearchClient.search({
 		  index: 'twitter',
 		  type: 'crawlers',
-		  size: 100
+		  size: 400
 		}).then(function (resp) {
 			results=resp.hits.hits;
 		var crawlers=[];
@@ -468,6 +468,42 @@ elasticSearchClient.count(function (error, response, status) {
   res.send('update', { title: count });
 });
 });
+
+
+
+router.get('/train', function(req, res) {
+	
+	var PythonShell = require('python-shell');
+		PythonShell.defaultOptions = {
+	        scriptPath: './python'
+	    };
+	var pyshell = new PythonShell('python_shell_test.py');
+
+	// i will give them a tweet
+	tweet=req.query.tweet;
+	kind=req.query.kind;
+	console.log(tweet);
+	
+	pyshell.send(tweet);
+	pyshell.send(kind);
+	//in return probabilite to be spam
+	var result=""
+	pyshell.on('message', function (message) {
+	  // received a message sent from the Python script (a simple "print" statement) 
+	  console.log("#"+message+"#");
+	  result=message;
+	});
+	//close the connection to python file
+	pyshell.end(function (err) {
+	  if (err) throw err;
+	  console.log('finished');
+res.send('training', { title: result });
+	});
+
+	
+
+});
+
 
 module.exports = router;
 	
