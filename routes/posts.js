@@ -64,25 +64,6 @@ router.get('/list', function(req, res) {
 		  from: from,
 
 		  q: query,
-		  //q: "keywords: happyfeet OR keywords: long"
-		  //q: 'favorite_count: '+ 0,
-
-		   // body: {
-			  //   query: {
-				 //      match: {
-				 //        keywords: q 	  
-				 //      }
-			  //   }
-			  // }
-
-
-		   //'language: ar'
-		  // query_string : {
-    //     fields : ["keywords", "language"],
-    //     query : q+ "AND "+language
-    // 	}
-
-		 
 		}).then(function (resp) {
 			
 			if (JSON.stringify(resp.hits.total)==0){
@@ -96,6 +77,23 @@ router.get('/list', function(req, res) {
 		});
 
 });
+
+
+router.get('/total_number_tweets', function(req, res) {
+elasticSearchClient.count({
+			  index: 'twitter',
+			  type:'posts'
+			 
+			}, function (error, response) {
+			  
+			  
+					res.render('crawlers', { crawlers: response});
+				
+			
+			});
+});
+
+
 
 module.exports = router;
 	

@@ -1,0 +1,14 @@
+extends layout
+
+block content
+
+  h1= "List of tweets to train"
+  a= "Keyword_______Nbr Tweets_______Delete" 
+  p="------------------------------"
+  each tweet in tweets
+    a= tweet._source.user.screen_name
+    a= ":_________:" 
+    a= tweet._source.text
+    a= ":_________:"
+    a(href="http://localhost:3000/twitter/crawlers/list_to_train?keyword="+keyword+"&page="+page+"&spam_name="+tweet._source.user.screen_name +"&spam_text="+tweet._source.text ) Mark as Spam
+    p= "###############################"

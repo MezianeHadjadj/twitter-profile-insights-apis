@@ -197,7 +197,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -217,9 +217,9 @@ router.get('/insert', function(req, res) {
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				CrawlerEngine.listenToTwitter();
+				//CrawlerEngine.listenToTwitter();
 				
-				CrawlerEngine.searchOnTwitter(req.query.keyword);
+				//CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
 		    	console.log('this keyword exist');
@@ -266,6 +266,10 @@ router.get('/insert', function(req, res) {
 /* update existing crawler */
 router.put('/update', function(req, res) {
   res.send('update', { title: 'Express' });
+});
+router.get('/check', function(req, res) {
+	console.log("yes checked");
+  res.send('check', { title: 'check' });
 });
 /* delete existing crawler */
 router.get('/delete', function(req, res) {
@@ -470,9 +474,54 @@ elasticSearchClient.count(function (error, response, status) {
 });
 
 
+router.get('/list_to_train', function(req, res) {
+keyword=req.query.keyword;
+	page=req.query.page;
+	//CrawlerEngine.train(tweet,kind,res);
+
+		
+	if (req.query.spam_name){
+		//tweet=req.query.spam_text
+		console.log( req.query.spam_name+"dddddelt"+req.query.spam_text);
+		
+	}
+elasticSearchClient.search({
+		  index: 'twitter',
+		  size:20,
+		  sort : 'id:desc',
+		  type: 'posts',
+		  from: (page-1)*20,
+
+		  q: 'text:'+keyword,		 
+		}).then(function (resp) {
+			console.log("###"+resp.hits.hits[0]._source.text+"####")
+			res.render('list_to_train', { tweets: resp.hits.hits,keyword:keyword,page:page});
+			 //res.json({ "results" :resp.hits.hits});
+		}, function (err) {
+		     console.trace("dddd"+err.message);
+		});
+	
+
+
+});
+
+router.get('/spam', function(req, res) {
+console.log("clicccccc");
+var newWindow = window.open("http://www.google.com/", '_blank');
+newWindow.focus();
+//window.location = "http://www.google.com/"
+//res.json({ "results" :resp.hits.hits});
+});
 
 router.get('/train', function(req, res) {
-	
+tweet=req.query.tweet;
+	kind=req.query.kind;
+	CrawlerEngine.train(tweet,kind,res);	
+
+});
+
+CrawlerEngine.train= function(tweet,kind,res){
+
 	var PythonShell = require('python-shell');
 		PythonShell.defaultOptions = {
 	        scriptPath: './python'
@@ -480,8 +529,8 @@ router.get('/train', function(req, res) {
 	var pyshell = new PythonShell('python_shell_test.py');
 
 	// i will give them a tweet
-	tweet=req.query.tweet;
-	kind=req.query.kind;
+	tweet=tweet;
+	kind=kind;
 	console.log(tweet);
 	
 	pyshell.send(tweet);
@@ -500,10 +549,7 @@ router.get('/train', function(req, res) {
 res.send('training', { title: result });
 	});
 
-	
-
-});
-
+}
 
 module.exports = router;
 	
