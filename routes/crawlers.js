@@ -197,7 +197,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -217,9 +217,9 @@ router.get('/insert', function(req, res) {
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				//CrawlerEngine.listenToTwitter();
+				CrawlerEngine.listenToTwitter();
 				
-				//CrawlerEngine.searchOnTwitter(req.query.keyword);
+				CrawlerEngine.searchOnTwitter(req.query.keyword);
 		    }
 		    else{
 		    	console.log('this keyword exist');
