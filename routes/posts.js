@@ -38,29 +38,43 @@ router.get('/list', function(req, res) {
 // list tweets from elasticsearch nodes
 	var language="";
 	var keywords=req.query.keywords;
-	console.log("keee"+keywords);
-	var list=[];
-			for( var i = 0,length = keywords.length; i < length; i++ ) {
-				list =list.concat(keywords[i].split(" "));
-				//q=q+' OR '+keywords[i]
-			}
-			//'language:'+language+' AND keywords: '+q
-
-	var q=list[0];
-			for( var i = 1,length = list.length; i < length; i++ ) {
+	// var list=[];
+	// 		for( var i = 0,length = keywords.length; i < length; i++ ) {
+	// 			list =list.concat(keywords[i].split(" "));
+	// 			//q=q+' OR '+keywords[i]
+	// 		}
+	// 		//'language:'+language+' AND keywords: '+q
+	// var q=keywords[0];
+	// 		for( var i = 1,length = keywords.length; i < length; i++ ) {
 				
-				q=q+' OR keywords: '+list[i];
-			}
+	// 			q=q+' OR text: '+keywords[i];
+	// 		}
 
 
+	var list2=[];
+	console.log("MMMMMMMMMMMM"+req.query.keywords.length+"mmmmmmmmmm");
+	var q2='text: '+keywords[0].split(" ")[0]
+	for( var i = 0,length = keywords.length; i < length; i++ ) {
+		
+		words=keywords[i].split(" ")
+		for (var j = 1,lengthj = words.length; j < lengthj; j++ ){
+			
+			q2=q2+' AND text: '+words[j]
+		}
+
+		
+	}
+	
+	//q2=q2+')'+'OR ( text :'+[keywords[keywords.length-1].split(" ")][0]
+	// console.log("qqqqqqqqqqqqqqq"+q2+"qqqqqqqq");
+	// console.log("text: قطر AND text: أودي");
 
 	if(req.query.language){
-		query='language:'+req.query.language+' AND keywords: ' +q;
+		query='language:'+req.query.language+' AND ' +q2;
 	}else{
-		query='keywords:'+q;
+		query=q2;
 	}
 	var more=true;
-
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  size: req.query.limit,
@@ -68,26 +82,9 @@ router.get('/list', function(req, res) {
 		  type: 'posts',
 		  from: from,
 
-		  q: query,
-		  //q: "keywords: happyfeet OR keywords: long"
-		  //q: 'favorite_count: '+ 0,
-
-		   // body: {
-			  //   query: {
-				 //      match: {
-				 //        keywords: q 	  
-				 //      }
-			  //   }
-			  // }
-
-
-		   //'language: ar'
-		  // query_string : {
-    //     fields : ["keywords", "language"],
-    //     query : q+ "AND "+language
-    // 	}
-
-		 
+		  q: q2
+		 //q: "(text: للمجوهرات AND text: قطر AND text: معرض) OR (text: قطر AND text: أودي)  "
+		 // q: "text: قطر AND text: أودي"
 		}).then(function (resp) {
 			
 			if (JSON.stringify(resp.hits.total)==0){
@@ -101,6 +98,23 @@ router.get('/list', function(req, res) {
 		});
 
 });
+
+
+router.get('/total_number_tweets', function(req, res) {
+elasticSearchClient.count({
+			  index: 'twitter',
+			  type:'posts'
+			 
+			}, function (error, response) {
+			  
+			  
+					res.render('crawlers', { crawlers: response});
+				
+			
+			});
+});
+
+
 
 module.exports = router;
 	
