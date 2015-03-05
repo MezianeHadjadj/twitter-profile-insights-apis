@@ -77,8 +77,8 @@ router.get('/list', function(req, res) {
 	var more=true;
 	elasticSearchClient.search({
 		  index: 'twitter',
-		  //size: req.query.limit,
-		  size: 3,
+		  size: req.query.limit,
+		  //size: 3,
 		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
