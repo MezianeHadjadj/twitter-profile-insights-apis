@@ -79,7 +79,7 @@ CrawlerEngine.searchOnTwitter=function(keyword){
     '1157418127-VdrrfNdZi3hXs7GqSrRRHbplY2bZUqe388gFBQ2',
     'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
 );
-twitterSearchClient.search({'q': keyword,'count':400}, function(error, result) {
+twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     if (error)
     {
         console.log('Error: ' + (error.code ? error.code + ' ' + error.message : error.message));
