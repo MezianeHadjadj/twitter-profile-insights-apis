@@ -54,16 +54,16 @@ router.get('/list', function(req, res) {
 	var list2=[];
 	console.log("MMMMMMMMMMMM"+req.query.keywords.length+"mmmmmmmmmm");
 	var q2='text: '+keywords[0].split(" ")[0]
-	for( var i = 0,length = keywords.length; i < length; i++ ) {
+	//for( var i = 0,length = keywords.length; i < length; i++ ) {
 		
-		words=keywords[i].split(" ")
+		words=keywords[0].split(" ")
 		for (var j = 1,lengthj = words.length; j < lengthj; j++ ){
 			
 			q2=q2+' AND text: '+words[j]
 		}
 
 		
-	}
+	//}
 	
 	//q2=q2+')'+'OR ( text :'+[keywords[keywords.length-1].split(" ")][0]
 	// console.log("qqqqqqqqqqqqqqq"+q2+"qqqqqqqq");
@@ -77,7 +77,8 @@ router.get('/list', function(req, res) {
 	var more=true;
 	elasticSearchClient.search({
 		  index: 'twitter',
-		  size: req.query.limit,
+		  //size: req.query.limit,
+		  size: 3,
 		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
