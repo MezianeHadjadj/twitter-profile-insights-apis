@@ -13,7 +13,7 @@ var Twitter = require('node-twitter');
 
 router.get('/list', function(req, res) {
 		keyword=req.query.keywords
-		console.log(keyword);
+		console.log(keyword+"keyword");
 		var list_influencers=[];
 		var indice=0;
 		for ( var k=0, lengthk=keyword.length;k <lengthk; k++){
@@ -25,7 +25,7 @@ router.get('/list', function(req, res) {
 		  type: 'posts',
 		  from: (req.query.page-1)*20,
 
-		  q: 'text:'+keyword[k],		 
+		  q: 'keywords:'+keyword[k],		 
 		}).then(function (resp) {
 			indice=indice+1;
 			if (JSON.stringify(resp.hits.total)==0){

@@ -14,6 +14,9 @@ var elasticSearchClient = new elasticsearch.Client({
 });
 var router = express.Router();
 var CrawlerEngine = {};
+
+
+
 //M Hadjadj 15-02-2015
 //insert tweet in elasticsearch 
 CrawlerEngine.indexTweet = function(tweet){
@@ -88,6 +91,7 @@ twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     if (result)
     {
     	//result=JSON.stringify(result)
+    			console.log("lennnn"+result["statuses"].length+"nellll");
 
 		      for(var i=0, length=result["statuses"].length;i<length;i++){
 		      			tweet=result["statuses"][i];
@@ -269,7 +273,7 @@ router.put('/update', function(req, res) {
 });
 router.get('/check', function(req, res) {
 	console.log("yes checked");
-  res.send('check', { title: 'check' });
+  res.send('check', "({ title: 'check' });");
 });
 /* delete existing crawler */
 router.get('/delete', function(req, res) {
