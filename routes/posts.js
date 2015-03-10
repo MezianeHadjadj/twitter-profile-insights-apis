@@ -50,21 +50,24 @@ router.get('/list', function(req, res) {
 	// 			q=q+' OR text: '+keywords[i];
 	// 		}
 
-
-	var list2=[];
-	console.log("MMMMMMMMMMMM"+req.query.keywords.length+"mmmmmmmmmm");
-	var q2='text: '+keywords[0].split(" ")[0]
-	//for( var i = 0,length = keywords.length; i < length; i++ ) {
-		
-		words=keywords[0].split(" ")
+	var q2=""
+	for( var i = 0,length = keywords.length; i < length; i++ ) {
+		 q2=q2+ '(text: '+keywords[i].split(" ")[0]
+		words=keywords[i].split(" ")
 		for (var j = 1,lengthj = words.length; j < lengthj; j++ ){
 			
 			q2=q2+' AND text: '+words[j]
 		}
+		if (i+1!=length){
+			q2=q2+") OR " ;
+		}else{
+			q2=q2+')'
+		}
 
 		
-	//}
+	}
 	
+	console.log("q2 tweets"+q2+"");
 	//q2=q2+')'+'OR ( text :'+[keywords[keywords.length-1].split(" ")][0]
 	// console.log("qqqqqqqqqqqqqqq"+q2+"qqqqqqqq");
 	// console.log("text: قطر AND text: أودي");
@@ -78,7 +81,7 @@ router.get('/list', function(req, res) {
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  size: req.query.limit,
-		  //size: 3,
+		  //size: 5,
 		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
@@ -115,6 +118,76 @@ elasticSearchClient.count({
 			});
 });
 
+router.get('/delete_duplicate_tweets', function(req, res) {
+
+
+
+
+
+		elasticSearchClient.search({
+					  index: 'twitter',
+					  
+					  type: 'posts',
+					  body: {
+
+					aggs: {
+			                touchdowns: {
+			                    terms: {
+			                    	size:400,
+			                        field: "id",
+			                        // order by quarter, ascending
+			                        order: { "_term" : "desc" }
+			                    }
+			                }
+			            }
+			           }
+					}).then(function (resp) {
+						results=resp.aggregations.touchdowns.buckets
+						//console.log(results[0]["doc_count"]+"ddddddddddd");
+						 for( var i = 0,length = results.length; i < length; i++ ) {
+						 	console.log(results[i]["doc_count"]);
+						 	if(results[i]["doc_count"]>1){
+
+						 		res.json({ "results" :results[i]});
+						 		break
+						 	}
+						 }
+						 
+							
+					}, function (err) {
+					     console.trace(err.message);
+					});
+
+
+
+
+
+
+
+
+		// elasticSearchClient.search({
+		//   index: 'twitter',
+
+		//   type: 'posts',
+
+		//   q: "id: "+req.query.id
+		//  //q: "(text: للمجوهرات AND text: قطر AND text: معرض) OR (text: قطر AND text: أودي)  "
+		//  // q: "text: قطر AND text: أودي"
+		// }).then(function (resp) {
+			
+
+
+		// 	}
+
+		// 	 res.json({ "results" :resp.hits.hits,"more":more});
+		// }, function (err) {
+		//      console.trace(err.message);
+		// });
+
+
+
+
+});
 
 
 module.exports = router;
