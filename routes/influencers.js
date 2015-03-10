@@ -12,11 +12,33 @@ var Twitter = require('node-twitter');
 
 
 router.get('/list', function(req, res) {
-		keyword=req.query.keywords
-		console.log(keyword+"keyword");
+		keywords=req.query.keywords
+		console.log(keywords+"keyword");
 		var list_influencers=[];
 		var indice=0;
-		for ( var k=0, lengthk=keyword.length;k <lengthk; k++){
+
+
+		console.log(keywords.length+"len");		
+
+		var q2=""
+	for( var i = 0,length = keywords.length; i < length; i++ ) {
+		 q2=q2+ '(text: '+keywords[i].split(" ")[0]
+		words=keywords[i].split(" ")
+		for (var j = 1,lengthj = words.length; j < lengthj; j++ ){
+			
+			q2=q2+' AND text: '+words[j]
+		}
+		if (i+1!=length){
+			q2=q2+") OR " ;
+		}else{
+			q2=q2+')'
+		}
+
+		
+	}
+
+
+		console.log("q2"+q2);
 		var more=true;
 		elasticSearchClient.search({
 		  index: 'twitter',
@@ -25,7 +47,8 @@ router.get('/list', function(req, res) {
 		  type: 'posts',
 		  from: (req.query.page-1)*20,
 
-		  q: 'keywords:'+keyword[k],		 
+		  //q: 'keywords:'+keyword[k],	
+		  q: q2	 
 		}).then(function (resp) {
 			indice=indice+1;
 			if (JSON.stringify(resp.hits.total)==0){
@@ -33,15 +56,15 @@ router.get('/list', function(req, res) {
 
 			}
 		
-			if(indice==keyword.length){
+			
 
 				res.json({ "results" :resp.hits.hits,"more":more});
-			}
+			
 			
 		}, function (err) {
 		     console.trace(err.message);
 		});
-}
+
 
 			
 });

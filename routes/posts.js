@@ -50,9 +50,6 @@ router.get('/list', function(req, res) {
 	// 			q=q+' OR text: '+keywords[i];
 	// 		}
 
-
-	var list2=[];
-	console.log("MMMMMMMMMMMM"+req.query.keywords.length+"mmmmmmmmmm");
 	var q2=""
 	for( var i = 0,length = keywords.length; i < length; i++ ) {
 		 q2=q2+ '(text: '+keywords[i].split(" ")[0]
@@ -70,7 +67,7 @@ router.get('/list', function(req, res) {
 		
 	}
 	
-	console.log("2222222"+q2+"2222222222");
+	console.log("q2 tweets"+q2+"");
 	//q2=q2+')'+'OR ( text :'+[keywords[keywords.length-1].split(" ")][0]
 	// console.log("qqqqqqqqqqqqqqq"+q2+"qqqqqqqq");
 	// console.log("text: قطر AND text: أودي");
