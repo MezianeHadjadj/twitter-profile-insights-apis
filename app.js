@@ -9,11 +9,16 @@ var routes = require('./routes/index');
 var crawlers = require('./routes/crawlers');
 var posts = require('./routes/posts');
 var influencers= require('./routes/influencers');
+var administration= require('./routes/administration');
+
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+// app.engine('html', require('ejs').renderFile);
+// app.set('view engine', 'html');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -27,6 +32,7 @@ app.use('/', routes);
 app.use('/twitter/crawlers', crawlers);
 app.use('/twitter/posts', posts);
 app.use('/twitter/influencers',influencers);
+app.use('/twitter/administration',administration);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
