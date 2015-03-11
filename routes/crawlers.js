@@ -207,30 +207,39 @@ CrawlerEngine.launchCrawlers();
 /* insert a new crawler */
 router.get('/insert', function(req, res) {
 	// list all existing crawlers
+	CrawlerEngine.insert_method(res,req.query.keyword,req.query.organization);
+	res.send('insert', { title: 'Express' });
+	
+});
+
+CrawlerEngine.insert_method=function(res,keyword,organization){
+
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  type: 'crawlers'
 		}).then(function (resp) {
 		    var currentKeywords = CrawlerEngine.extractExistingKeywords(resp.hits.hits);
 		    twitterCrawler.keywords = {"keywords":currentKeywords};
-		    if (twitterCrawler.keywords['keywords'].indexOf(req.query.keyword) == -1){
-		    	twitterCrawler.keywords['keywords'].push(req.query.keyword);
+		    if (twitterCrawler.keywords['keywords'].indexOf(keyword) == -1){
+		    	console.log("inseett");
+		    	twitterCrawler.keywords['keywords'].push(keyword);
 		    	// index the crawler for the requested keyword
-		    	CrawlerEngine.insertCrawler({keyword:req.query.keyword,organization:req.query.organization});
+		    	CrawlerEngine.insertCrawler({keyword:keyword,organization:organization});
 		    	if(twitterCrawler.currentStream){
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
 				CrawlerEngine.listenToTwitter();
 				
-				CrawlerEngine.searchOnTwitter(req.query.keyword);
+				CrawlerEngine.searchOnTwitter(keyword);
 		    }
 		    else{
+		    	console.log("update organisation");
 		    	console.log('this keyword exist');
 		    	elasticSearchClient.search({
 					  index: 'twitter',
 					  type: 'crawlers',
-					  q: 'keyword:'+ req.query.keyword
+					  q: 'keyword:'+ keyword
 					}).then(function (resp) {
 						console.log("ressss"+JSON.stringify(resp.hits.hits[0]._source.organization));
 						var organizations=resp.hits.hits[0]._source.organization;
@@ -265,8 +274,10 @@ router.get('/insert', function(req, res) {
 		}, function (err) {
 		    //console.trace(err.message);
 		});
-  	res.send('insert', { title: 'Express' });
-});
+  	
+}
+
+
 /* update existing crawler */
 router.put('/update', function(req, res) {
   res.send('update', { title: 'Express' });
