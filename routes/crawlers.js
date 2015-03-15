@@ -201,7 +201,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -212,23 +212,7 @@ router.get('/insert', function(req, res) {
 	
 });
 
-router.get('/delete_blank', function(req, res) {
 
- elasticSearchClient.deleteByQuery({
-					  index: 'twitter',
-					  type: 'crawlers',
-					  q: 'machine: '+"127.0.0.1"
-					 // body: {
-				  //   query: {
-				  //     term: { keyword: keyword }
-				  //   }
-				  // }
-					}) .then(function (resp) {
-						
-				},function (error, response) {
-					  console.log("erorr:"+error+JSON.stringify(response));
-					});
-});
 
 CrawlerEngine.insert_method=function(res,keyword,organization){
 	console.log("keyword:"+keyword);
@@ -248,9 +232,9 @@ CrawlerEngine.insert_method=function(res,keyword,organization){
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				//CrawlerEngine.listenToTwitter();
+				CrawlerEngine.listenToTwitter();
 				
-				//CrawlerEngine.searchOnTwitter(keyword);
+				CrawlerEngine.searchOnTwitter(keyword);
 		    }
 		    else{
 		    	console.log("update organisation");
