@@ -201,7 +201,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -212,14 +212,33 @@ router.get('/insert', function(req, res) {
 	
 });
 
-CrawlerEngine.insert_method=function(res,keyword,organization){
+router.get('/delete_blank', function(req, res) {
 
+ elasticSearchClient.deleteByQuery({
+					  index: 'twitter',
+					  type: 'crawlers',
+					  q: 'machine: '+"127.0.0.1"
+					 // body: {
+				  //   query: {
+				  //     term: { keyword: keyword }
+				  //   }
+				  // }
+					}) .then(function (resp) {
+						
+				},function (error, response) {
+					  console.log("erorr:"+error+JSON.stringify(response));
+					});
+});
+
+CrawlerEngine.insert_method=function(res,keyword,organization){
+	console.log("keyword:"+keyword);
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  type: 'crawlers'
 		}).then(function (resp) {
 		    var currentKeywords = CrawlerEngine.extractExistingKeywords(resp.hits.hits);
 		    twitterCrawler.keywords = {"keywords":currentKeywords};
+		    console.log("keywsssssss!"+twitterCrawler.keywords['keywords']+"keyssss");
 		    if (twitterCrawler.keywords['keywords'].indexOf(keyword) == -1){
 		    	console.log("inseett");
 		    	twitterCrawler.keywords['keywords'].push(keyword);
@@ -229,9 +248,9 @@ CrawlerEngine.insert_method=function(res,keyword,organization){
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				CrawlerEngine.listenToTwitter();
+				//CrawlerEngine.listenToTwitter();
 				
-				CrawlerEngine.searchOnTwitter(keyword);
+				//CrawlerEngine.searchOnTwitter(keyword);
 		    }
 		    else{
 		    	console.log("update organisation");
@@ -243,7 +262,7 @@ CrawlerEngine.insert_method=function(res,keyword,organization){
 					}).then(function (resp) {
 						console.log("ressss"+JSON.stringify(resp.hits.hits[0]._source.organization));
 						var organizations=resp.hits.hits[0]._source.organization;
-						if (organizations.indexOf(req.query.organization)==-1 ){
+						if (organizations.indexOf(organization)==-1 ){
 							
 								elasticSearchClient.update({
 							  index: 'twitter',
@@ -252,11 +271,11 @@ CrawlerEngine.insert_method=function(res,keyword,organization){
 							  body: {
 							    // put the partial document under the `doc` key
 							    doc: {
-							      organization: organizations.concat([req.query.organization])
+							      organization: organizations.concat([organization])
 							    }
 							  }
 							}, function (error, response) {
-							  console.log(error+"ddd");
+							  console.log(error+"ddd"+response+"ddderror");
 							})
 
 						}else{
@@ -300,6 +319,7 @@ router.get('/delete', function(req, res) {
 				var organizations=resp.hits.hits[0]._source.organization;
 
 				if (organizations.length==1){
+						console.log("organisation==1");
 					  elasticSearchClient.deleteByQuery({
 					  index: 'twitter',
 					  type: 'crawlers',
@@ -341,12 +361,15 @@ router.get('/delete', function(req, res) {
 						});
 		
 				}else{
+					console.log("organisation!=1");
 					console.log("more"+organizations);
+					console.log("query organizatin:"+req.query.organization )
 					var index = organizations.indexOf(req.query.organization);
+					console.log("index:"+index);
 					if (index > -1) {
 					    organizations.splice(index, 1);
 					}
-					
+					console.log("organizations:"+organizations);
 					
 						elasticSearchClient.update({
 					  index: 'twitter',
