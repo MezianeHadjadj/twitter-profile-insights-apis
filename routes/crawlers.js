@@ -82,7 +82,7 @@ CrawlerEngine.searchOnTwitter=function(keyword){
     '1157418127-VdrrfNdZi3hXs7GqSrRRHbplY2bZUqe388gFBQ2',
     'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
 );
-twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
+twitterSearchClient.search({'q': keyword,'count':25}, function(error, result) {
     if (error)
     {
         console.log('Error: ' + (error.code ? error.code + ' ' + error.message : error.message));
@@ -128,6 +128,7 @@ CrawlerEngine.insert_after_predict= function(tweets,keyword,kind){
 	  if (err) throw err;
 	  	if(result<0.7){
 	  		if(kind="search"){
+	  			console.log("insertttttttt");
 	  			CrawlerEngine.insertTweet(tweets[j],keyword);
 	  		}else{
 	  			CrawlerEngine.indexTweet(tweets[j]);
