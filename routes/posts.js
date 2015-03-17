@@ -70,13 +70,13 @@ router.get('/list', function(req, res) {
 	// if(req.query.location){
 	// 	q2='(location: '+req.query.language+') AND ' +q2;
 	// }
-	
+
 	console.log("q2 tweets"+q2+"");
 	var more=true;
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  size: req.query.limit,
-		  //size: 4,
+		  //size: 2,
 		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
