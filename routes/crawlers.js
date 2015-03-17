@@ -60,11 +60,11 @@ CrawlerEngine.indexTweet = function(tweet){
 CrawlerEngine.listenToTwitter= function(){
 	try {
 		var stream = twitterCrawler.streamChannels({track:twitterCrawler.keywords});
-		console.log('stream invokedddddddddddd');
+		console.log('stream invoked');
 		twitterCrawler.currentStream = stream;
 		stream.on('channels', function(tweet) {
-			CrawlerEngine.insert_after_predict(tweet,"keyword","stream")
 			
+			CrawlerEngine.indexTweet(tweet);
 		});
 		stream.on('error', function(error) {
 		    console.log(error);
@@ -82,7 +82,7 @@ CrawlerEngine.searchOnTwitter=function(keyword){
     '1157418127-VdrrfNdZi3hXs7GqSrRRHbplY2bZUqe388gFBQ2',
     'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
 );
-twitterSearchClient.search({'q': keyword,'count':25}, function(error, result) {
+twitterSearchClient.search({'q': keyword,'count':100}, function(error, result) {
     if (error)
     {
         console.log('Error: ' + (error.code ? error.code + ' ' + error.message : error.message));
@@ -90,63 +90,22 @@ twitterSearchClient.search({'q': keyword,'count':25}, function(error, result) {
  
     if (result)
     {
-	
-	CrawlerEngine.insert_after_predict(result["statuses"],keyword,"search")
+    	//result=JSON.stringify(result)
+    			console.log("lennnn"+result["statuses"].length+"nellll");
+
+		      for(var i=0, length=result["statuses"].length;i<length;i++){
+		      			tweet=result["statuses"][i];
+		      			console.log("################"+JSON.stringify(tweet));
+		      			
+    	      					CrawlerEngine.insertTweet(tweet,keyword);
+
+
+		      }
 
     }
 });
 
 }
-CrawlerEngine.insert_after_predict= function(tweets,keyword,kind){
-	
-	 var j=0;
-		for(var i=0, length=tweets.length;i<length;i++){
-		   tweet=tweets[i];
-		  //list_prob.push(CrawlerEngine.insert_after_predict(tweet));
-		    			console.log("tweetttttttt:"+tweet+"twwwwwww");
-	tweet_value=tweet.user.screen_name+" "+tweet.text+" "+tweet.user.description
-		      					
-	var PythonShell = require('python-shell');
-		PythonShell.defaultOptions = {
-	        scriptPath: './python'
-	    };
-	var pyshell = new PythonShell('python_shell_test.py');
-
-	// i will give them a tweet
-
-	pyshell.send(tweet_value);
-	pyshell.send("predict");
-	//in return probabilite to be spam
-	var result=""
-	pyshell.on('message', function (message) {
-	  // received a message sent from the Python script (a simple "print" statement) 
-	  //console.log("#"+message+"#");
-	  result=message;
-	});
-	//close the connection to python file
-	pyshell.end(function (err) {
-	  if (err) throw err;
-	  	if(result<0.7){
-	  		if(kind="search"){
-	  			console.log("insertttttttt");
-	  			CrawlerEngine.insertTweet(tweets[j],keyword);
-	  		}else{
-	  			CrawlerEngine.indexTweet(tweets[j]);
-	  		}
-	  		
-	console.log("infff"+result+"---"+JSON.stringify(tweets[j].user.screen_name)+JSON.stringify(tweets[j].text)+JSON.stringify(tweets[j].user.description));
-	  	}else{
-	  		console.log("is spam")
-	  	//	console.log("suppppp"+result+"---"+JSON.stringify(tweets[j].user.screen_name)+JSON.stringify(tweets[j].text)+JSON.stringify(tweets[j].tweet.user.description));
-	  	}
-	  	j=j+1;
-	  
-
-	});
-  
-   }
-}
-
 CrawlerEngine.insertTweet =function(tweet,keyword){
 	elasticSearchClient.search({
 								  index: 'twitter',
@@ -256,7 +215,7 @@ router.get('/insert', function(req, res) {
 
 
 CrawlerEngine.insert_method=function(res,keyword,organization){
-	console.log("organization:"+organization);
+	console.log("keyword:"+keyword);
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  type: 'crawlers'
@@ -529,29 +488,11 @@ router.get('/list', function(req, res) {
 
 router.get('/stats', function(req, res) {
 	
-	elasticSearchClient.count({
-						  index: '.marvel-2015.02.08'
-						}, function (error, response) {
-						  
-
-							res.send('stream', { stream: JSON.stringify(response) });
-
-
-
-						});
-
-	elasticSearchClient.deleteByQuery({
-					  index: '.marvel-2015.02.08'
-					 
-					}) .then(function (resp) {
-						
-							console.log("yesss");
-				},function (error, response) {
-					  console.log("erorr:"+error+JSON.stringify(response));
-					});
-
-
-
+elasticSearchClient.count(function (error, response, status) {
+  // check for and handle error
+  var count = response.count;
+  res.send('update', { title: count });
+});
 });
 
 
@@ -561,10 +502,9 @@ keyword=req.query.keyword;
 	//CrawlerEngine.train(tweet,kind,res);
 
 		
-	if (req.query.spam_text){
+	if (req.query.spam_name){
 		//tweet=req.query.spam_text
-		console.log( req.query.spam_text+"dddddelt");
-		CrawlerEngine.train(req.query.spam_text,"spam",res);
+		console.log( req.query.spam_name+"dddddelt"+req.query.spam_text);
 		
 	}
 elasticSearchClient.search({
@@ -598,7 +538,7 @@ newWindow.focus();
 router.get('/train', function(req, res) {
 tweet=req.query.tweet;
 	kind=req.query.kind;
-	result= CrawlerEngine.train(tweet,kind,res);	
+	CrawlerEngine.train(tweet,kind,res);	
 
 });
 
@@ -628,15 +568,7 @@ CrawlerEngine.train= function(tweet,kind,res){
 	pyshell.end(function (err) {
 	  if (err) throw err;
 	  console.log('finished');
-	  if( res){
-	  	console.log("res");
-
-	  	res.send('training', { title: result });
-	  }else{
-	  	console.log("not res");
-	  	return result
-	  }
-
+res.send('training', { title: result });
 	});
 
 }
