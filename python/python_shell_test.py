@@ -120,8 +120,8 @@ class classifier:
 		if self.catcount(cat)==0: return 0
 		# The total number of times this feature appeared in this
 		# category divided by the total number of items in this category
-		print "fff",f, "ccc",cat
-		print self.fcount(f,cat),"/////////",self.catcount(cat)
+		#print "fff",f, "ccc",cat
+		#print self.fcount(f,cat),"/////////",self.catcount(cat)
 		return self.fcount(f,cat)/self.catcount(cat)
 	def weightedprob(self,f,cat,prf,weight=1.0,ap=0.5):
 		# Calculate current probability
@@ -161,7 +161,7 @@ for line in sys.stdin:
   else:
   	kind=line
 if kind.strip()=="spam" or kind.strip()=="not_spam":
-	cl.train(tweet, kind.strip())
+	cl.train(tweet, (kind.strip()).lower())
 	cl.store_train()
 	print "finish training"
 
@@ -169,10 +169,11 @@ if kind.strip()=="predict":
 	text_features=(tweet.strip()).split()
 	global_weight=0
 	for ele in text_features:
-		spamprob=cl.weightedprob(ele,'spam',cl.fprob)
-		global_weight=global_weight+spamprob
-
-	print global_weight/len(text_features), "is a spam"
+		#spamprob=cl.weightedprob(ele,'spam',cl.fprob)
+		#global_weight=global_weight+spamprob
+		global_weight=global_weight+cl.fprob(ele.lower(),'spam')
+		#print "final", global_weight
+	print global_weight/len(text_features)+0.5
 #cl.train('this is a robot ','spam')
 
 #cl.train('mobile','spam')
