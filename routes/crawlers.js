@@ -20,7 +20,7 @@ var CrawlerEngine = {};
 //M Hadjadj 15-02-2015
 //insert tweet in elasticsearch 
 CrawlerEngine.indexTweet = function(tweet){
-	user_location=(tweet.user.location).replace(" ","_");
+	var user_location=(tweet.user.location).replace(" ","_");
 	var tweetDocument = {
 		from: "Stream",
     	id:tweet.id_str,
@@ -114,7 +114,7 @@ CrawlerEngine.insertTweet =function(tweet,keyword){
 								  q: 'id: '+tweet.id_str
 									}).then(function (resp) {
 										if( (resp.hits.hits).length==0) {
-											user_location=(tweet.user.location).replace(" ","_");
+											var user_location=(tweet.user.location).replace(" ","_");
 											var tweetDocument = {
 					      				from:"Search",
 								    	id:tweet.id_str,
