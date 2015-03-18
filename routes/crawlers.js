@@ -20,7 +20,7 @@ var CrawlerEngine = {};
 //M Hadjadj 15-02-2015
 //insert tweet in elasticsearch 
 CrawlerEngine.indexTweet = function(tweet){
-	
+	user_location=(tweet.user.location).replace(" ","_");
 	var tweetDocument = {
 		from: "Stream",
     	id:tweet.id_str,
@@ -34,7 +34,7 @@ CrawlerEngine.indexTweet = function(tweet){
     		id:tweet.user.id,
     		name:tweet.user.name,
     		screen_name:tweet.user.screen_name,
-    		location:tweet.user.location,
+    		location:user_location,
     		description:tweet.user.description,
     		followers_count:tweet.user.followers_count,
     		favourites_count:tweet.user.favourites_count,
@@ -63,7 +63,7 @@ CrawlerEngine.listenToTwitter= function(){
 		console.log('stream invoked');
 		twitterCrawler.currentStream = stream;
 		stream.on('channels', function(tweet) {
-			
+			console.log("twwwwwwwwwwwwwwwww"+tweet+"twwwwwwwwwwwwwww");
 			CrawlerEngine.indexTweet(tweet);
 		});
 		stream.on('error', function(error) {
@@ -114,6 +114,7 @@ CrawlerEngine.insertTweet =function(tweet,keyword){
 								  q: 'id: '+tweet.id_str
 									}).then(function (resp) {
 										if( (resp.hits.hits).length==0) {
+											user_location=(tweet.user.location).replace(" ","_");
 											var tweetDocument = {
 					      				from:"Search",
 								    	id:tweet.id_str,
@@ -127,7 +128,7 @@ CrawlerEngine.insertTweet =function(tweet,keyword){
 								    		id:tweet.user.id,
 								    		name:tweet.user.name,
 								    		screen_name:tweet.user.screen_name,
-								    		location:tweet.user.location,
+								    		location:user_location,
 								    		description:tweet.user.description,
 								    		followers_count:tweet.user.followers_count,
 								    		friends_count:tweet.user.friends_count,
@@ -201,7 +202,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-CrawlerEngine.launchCrawlers();
+//CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -232,9 +233,9 @@ CrawlerEngine.insert_method=function(res,keyword,organization){
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				CrawlerEngine.listenToTwitter();
+				//CrawlerEngine.listenToTwitter();
 				
-				CrawlerEngine.searchOnTwitter(keyword);
+				//CrawlerEngine.searchOnTwitter(keyword);
 		    }
 		    else{
 		    	console.log("update organisation");
@@ -473,7 +474,7 @@ router.get('/list', function(req, res) {
 			            }
 			           }
 					}).then(function (resp) {
-						console.log("rsppppppppppppp"+JSON.stringify(resp.aggregations.touchdowns.buckets[0]["key"]))
+						//console.log("rsppppppppppppp"+JSON.stringify(resp.aggregations.touchdowns.buckets[0]["key"]))
 						var crawlers=resp.aggregations.touchdowns.buckets;
 						res.render('index', { crawlers: crawlers});
 					}, function (err) {
