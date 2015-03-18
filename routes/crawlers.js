@@ -202,7 +202,7 @@ CrawlerEngine.launchCrawlers = function(){
 	});
 }
 
-//CrawlerEngine.launchCrawlers();
+CrawlerEngine.launchCrawlers();
 
 
 /* insert a new crawler */
@@ -233,9 +233,9 @@ CrawlerEngine.insert_method=function(res,keyword,organization){
 					twitterCrawler.currentStream.stop();
 				}
 				// Start the crawling job
-				//CrawlerEngine.listenToTwitter();
+				CrawlerEngine.listenToTwitter();
 				
-				//CrawlerEngine.searchOnTwitter(keyword);
+				CrawlerEngine.searchOnTwitter(keyword);
 		    }
 		    else{
 		    	console.log("update organisation");
