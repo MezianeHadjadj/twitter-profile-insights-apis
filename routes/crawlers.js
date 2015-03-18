@@ -298,9 +298,9 @@ router.get('/delete', function(req, res) {
 		elasticSearchClient.search({
 			  index: 'twitter',
 			  type: 'crawlers',
-			  q: 'keyword:'+ req.query.keyword
+			  q: 'keyword: '+ req.query.keyword
 			}).then(function (resp) {
-				console.log("ressss"+JSON.stringify(resp.hits.hits[0]._source.organization));
+				//console.log("ressss"+JSON.stringify(resp.hits.hits[0]._source.organization));
 				var organizations=resp.hits.hits[0]._source.organization;
 
 				if (organizations.length==1){
@@ -316,34 +316,34 @@ router.get('/delete', function(req, res) {
 				  // }
 					}) .then(function (resp) {
 						twitterCrawler.currentStream.stop();
-						setTimeout(function(){ CrawlerEngine.launchCrawlers(); }, 3000);
+						setTimeout(function(){ CrawlerEngine.launchCrawlers(); }, 500);
 						
 							console.log("yesss");
 				},function (error, response) {
 					  console.log("erorr:"+error+JSON.stringify(response));
 					});
-					var siz=1;
-					elasticSearchClient.count({
-						  index: 'twitter',
-						  type:'posts',
-						  q: 'keywords: '+keyword
-						}, function (error, response) {
-						  siz=siz+response["count"]/50;
+					// var siz=1;
+					// elasticSearchClient.count({
+					// 	  index: 'twitter',
+					// 	  type:'posts',
+					// 	  q: 'keywords: '+keyword
+					// 	}, function (error, response) {
+					// 	  siz=siz+response["count"]/50;
 
-						  elasticSearchClient.deleteByQuery({
-								  index: 'twitter',
-								  type:'posts',
-						 		 q: 'keywords: '+keyword
-								}, function (error, response) {
-								  console.log("###########"+error);
-								});
+					// 	  elasticSearchClient.deleteByQuery({
+					// 			  index: 'twitter',
+					// 			  type:'posts',
+					// 	 		 q: 'keywords: '+keyword
+					// 			}, function (error, response) {
+					// 			  console.log("###########"+error);
+					// 			});
 						  
 
-							res.send('update', { title: 'Deleted' });
+					// 		res.send('update', { title: 'Deleted' });
 
 
 
-						});
+					// 	});
 		
 				}else{
 					console.log("organisation!=1");
@@ -386,6 +386,16 @@ router.get('/delete', function(req, res) {
 
 
 });
+router.get('/dell', function(req, res) {
+elasticSearchClient.deleteByQuery({
+								  index: 'twitter',
+								  type:'crawlers',
+						 		 q: 'machine: '+"127.0.0.1"
+								}, function (error, response) {
+								  console.log("###########"+error+JSON.stringify(response));
+								});
+						  
+	});					  
 router.get('/crawlers', function(req, res) {
 
 elasticSearchClient.search({
