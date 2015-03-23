@@ -387,15 +387,46 @@ router.get('/delete', function(req, res) {
 
 });
 router.get('/dell', function(req, res) {
-elasticSearchClient.deleteByQuery({
-								  index: 'twitter',
-								  type:'crawlers',
-						 		 q: 'machine: '+"127.0.0.1"
-								}, function (error, response) {
-								  console.log("###########"+error+JSON.stringify(response));
-								});
-						  
-	});					  
+
+// var geocoderProvider = 'google';
+// var httpAdapter = 'https';
+// // optionnal
+// var extra = {
+//     apiKey: 'AIzaSyDHuaxvm9WSs0nu-FrZhZcmaKzhvLiSczY', // for Mapquest, OpenCage, Google Premier
+//     formatter: null         // 'gpx', 'string', ...
+// };
+
+
+// var geocoder = require('node-geocoder').getGeocoder(geocoderProvider, httpAdapter, extra);
+ 
+// // Using callback 
+// geocoder.geocode('29 champs elysée paris', function(err, res) {
+//     console.log(res);
+// });
+
+
+// geocoder.geocode('29 champs elysée paris')
+//     .then(function(res) {
+//         console.log(res);
+//     })
+//     .catch(function(err) {
+//         console.log(err);
+//     });
+
+
+var geocoder = require('geocoder');
+ 
+// Geocoding
+geocoder.geocode("london", function ( err, data ) {
+	console.log("dd"+JSON.stringify(data["results"][0]["geometry"]["location"]["lat"]));
+  // do stuff with data
+});
+
+
+});					  
+
+
+
 router.get('/crawlers', function(req, res) {
 
 elasticSearchClient.search({

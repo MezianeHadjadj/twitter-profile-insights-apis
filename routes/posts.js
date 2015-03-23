@@ -28,7 +28,7 @@ router.get('/tweet_details', function(req, res) {
 
 		
 });
-
+//Pay attention actually there are a diff when listing for crm and "crm ?" is about and...
 /* list existing crawlers */
 router.get('/list', function(req, res) {
 	
@@ -51,9 +51,9 @@ router.get('/list', function(req, res) {
 			q2=q2+' AND text: '+words[j]
 		}
 		if (i+1!=length){
-			q2=q2+") OR " ;
+			q2=q2+" ) OR " ;
 		}else{
-			q2=q2+')'
+			q2=q2+' )'
 		}
 
 		
@@ -70,17 +70,16 @@ router.get('/list', function(req, res) {
 	// if(req.query.location){
 	// 	q2='(location: '+req.query.language+') AND ' +q2;
 	// }
-
+	//q2="text: \! "
 	console.log("q2 tweets"+q2+"");
 	var more=true;
 	elasticSearchClient.search({
 		  index: 'twitter',
 		  size: req.query.limit,
-		  //size: 2,
+		  //size: 4,
 		  sort : 'id:desc',
 		  type: 'posts',
 		  from: from,
-
 		  q: q2
 		 //q: "(text: للمجوهرات AND text: قطر AND text: معرض) OR (text: قطر AND text: أودي)  "
 		 // q: "text: قطر AND text: أودي"
