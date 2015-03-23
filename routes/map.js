@@ -7,7 +7,7 @@ var elasticSearchClient = new elasticsearch.Client({
 var router = express.Router();
 var ParserEngine = {};
 var Twitter = require('node-twitter');
-var geo = require('geo');
+
 var MapEngine = {};
 var geocoder = require('geocoder');
 router.get('/list', function(req, res) {
@@ -211,36 +211,36 @@ MapEngine.location_function=function(crawlers,i,finish,res){
 
 }
 
-MapEngine.insert_location=function(crawlers,element,i,finish,res){
-	element["key"]=element["key"].replace("_"," ")
-	element["key"]=element["key"].trim();
-	geo.geocoder(geo.google, "London", false,
-						    function(formattedAddress, latitude, longitude, details) {
-						    	console.log("dd"+JSON.stringify(element));
-						    	element["latitude"]=latitude;
-						    	element["longitude"]=longitude;
-						        console.log("####Formatted Address: " + formattedAddress);
-						        console.log("Latitude: " + latitude);
-						        console.log("Longitude: " + longitude);
-						        console.log("Address details:", details);
-						        console.log(element["key"]+"####")
-						        //return element
-						        console.log("fff"+finish+i);
-						        // if(finish){
+// MapEngine.insert_location=function(crawlers,element,i,finish,res){
+// 	element["key"]=element["key"].replace("_"," ")
+// 	element["key"]=element["key"].trim();
+// 	geo.geocoder(geo.google, "London", false,
+// 						    function(formattedAddress, latitude, longitude, details) {
+// 						    	console.log("dd"+JSON.stringify(element));
+// 						    	element["latitude"]=latitude;
+// 						    	element["longitude"]=longitude;
+// 						        console.log("####Formatted Address: " + formattedAddress);
+// 						        console.log("Latitude: " + latitude);
+// 						        console.log("Longitude: " + longitude);
+// 						        console.log("Address details:", details);
+// 						        console.log(element["key"]+"####")
+// 						        //return element
+// 						        console.log("fff"+finish+i);
+// 						        // if(finish){
 
-						        // res.json({ "results" :crawlers});
-						        // }
-						        // list_locations.push(element);
-						        // if(list_locations.length==50){
-						        // 	res.json({ "results" :list_locations});
-						        // }
-						        if(i+1=crawlers.length){
-						        	res.json({ "results" :list_locations});
-						        }
+// 						        // res.json({ "results" :crawlers});
+// 						        // }
+// 						        // list_locations.push(element);
+// 						        // if(list_locations.length==50){
+// 						        // 	res.json({ "results" :list_locations});
+// 						        // }
+// 						        if(i+1=crawlers.length){
+// 						        	res.json({ "results" :list_locations});
+// 						        }
 
-						    });
+// 						    });
 
-}
+// }
 
 
 
