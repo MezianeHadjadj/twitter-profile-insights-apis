@@ -93,7 +93,7 @@ router.get('/list', function(req, res) {
 
 				    query : {
 				        filtered : {
-				            query:   { "match": { "text": req.query.keywords[0] }}
+				            query:   { "match": { "keywords": req.query.keywords[0] }}
 				        }
 				    },
 
