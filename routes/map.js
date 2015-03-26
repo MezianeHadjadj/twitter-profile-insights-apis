@@ -158,7 +158,7 @@ var keywords=req.query.keywords;
 		  index: 'twitter',
 		  sort : 'id:desc',
 		  type: 'posts',
-		  size: 100,
+		  size: 150,
 
 		  q: q2
 		}).then(function (resp) {

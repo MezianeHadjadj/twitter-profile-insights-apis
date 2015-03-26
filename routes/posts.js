@@ -70,30 +70,74 @@ router.get('/list', function(req, res) {
 	// if(req.query.location){
 	// 	q2='(location: '+req.query.language+') AND ' +q2;
 	// }
-	//q2="text: \! "
-	console.log("q2 tweets"+q2+"");
-	var more=true;
-	elasticSearchClient.search({
-		  index: 'twitter',
-		  size: req.query.limit,
-		  //size: 4,
-		  sort : 'id:desc',
-		  type: 'posts',
-		  from: from,
-		  q: q2
-		 //q: "(text: للمجوهرات AND text: قطر AND text: معرض) OR (text: قطر AND text: أودي)  "
-		 // q: "text: قطر AND text: أودي"
-		}).then(function (resp) {
-			
-			if (JSON.stringify(resp.hits.total)==0){
-				more=false;
+	var res_source=res;
+	var elastical = require('elastical');
+	var client = new elastical.Client('104.154.66.240', {port: 9200});
+	if(q2.indexOf("?")!=-1&req.query.keywords.length==1){
+						console.log("yes in"+req.query.keywords.length);
+						var more=true;
+					client.search({
+						index: 'twitter',
+						  size: req.query.limit,
+						 // size: 10,
+						  type: 'posts',
+						  from: from,
+				    // query: {
+				    	
+						  
+						  
+				    // 	query_string: {
 
-			}
+				    // 		query: 'crm ?'}
+				    // },
 
-			 res.json({ "results" :resp.hits.hits,"more":more});
-		}, function (err) {
-		     console.trace(err.message);
-		});
+				    query : {
+				        filtered : {
+				            query:   { "match": { "text": req.query.keywords[0] }}
+				        }
+				    },
+
+				    sort: 
+				    	{ "id":   { "order": "desc" }},
+				    
+
+
+				}, function (err, results) {
+					
+					if (JSON.stringify(results.hits.total)==0){
+								more=false;
+
+							}
+				    //res.json({ "results" :JSON.stringify(results)});
+				     res.json({ "results" :results.hits,"more":more});
+				});
+	}
+	else{
+					var more=true;
+					elasticSearchClient.search({
+						  index: 'twitter',
+						  size: req.query.limit,
+						  //size: 4,
+						  sort : 'id:desc',
+						  type: 'posts',
+						  from: from,
+						  q: q2
+						 //q: "(text: للمجوهرات AND text: قطر AND text: معرض) OR (text: قطر AND text: أودي)  "
+						 // q: "text: قطر AND text: أودي"
+						}).then(function (resp) {
+							
+							if (JSON.stringify(resp.hits.total)==0){
+								more=false;
+
+							}
+
+							 res.json({ "results" :resp.hits.hits,"more":more});
+						}, function (err) {
+						     console.trace(err.message);
+						});
+
+	}
+
 
 });
 

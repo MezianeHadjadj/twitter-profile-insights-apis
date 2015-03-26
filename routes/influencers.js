@@ -42,10 +42,10 @@ router.get('/list', function(req, res) {
 		var more=true;
 		elasticSearchClient.search({
 		  index: 'twitter',
-		  size:20,
+		  size:30,
 		  sort : 'user.followers_count:desc',
 		  type: 'posts',
-		  from: (req.query.page-1)*20,
+		  from: (req.query.page-1)*30,
 
 		  //q: 'keywords:'+keyword[k],	
 		  q: q2	 
