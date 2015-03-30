@@ -330,13 +330,13 @@ router.get('/delete', function(req, res) {
 					// 	}, function (error, response) {
 					// 	  siz=siz+response["count"]/50;
 
-					// 	  elasticSearchClient.deleteByQuery({
-					// 			  index: 'twitter',
-					// 			  type:'posts',
-					// 	 		 q: 'keywords: '+keyword
-					// 			}, function (error, response) {
-					// 			  console.log("###########"+error);
-					// 			});
+						  // elasticSearchClient.deleteByQuery({
+								//   index: 'twitter',
+								//   type:'posts',
+						 	// 	 q: 'keywords: '+keyword
+								// }, function (error, response) {
+								//   console.log("###########"+error+response+" ####");
+								// });
 						  
 
 					// 		res.send('update', { title: 'Deleted' });
@@ -424,6 +424,19 @@ geocoder.geocode("london", function ( err, data ) {
 
 
 });					  
+
+
+router.get('/delete_tweets', function(req, res) {
+ elasticSearchClient.deleteByQuery({
+								  index: 'twitter',
+								  type:'posts',
+						 		 q: 'keywords: '+req.query.keyword
+								}, function (error, response) {
+								  console.log("###########"+error+response+" ####");
+									res.send('delete', "deleted");
+								});
+
+ });
 
 
 

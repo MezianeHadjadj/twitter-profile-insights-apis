@@ -72,7 +72,7 @@ router.get('/list', function(req, res) {
 	// }
 	var res_source=res;
 	var elastical = require('elastical');
-	var client = new elastical.Client('104.154.66.240', {port: 9200});
+	var client = new elastical.Client('104.197.12.112', {port: 9200});
 	if(q2.indexOf("?")!=-1&req.query.keywords.length==1){
 						console.log("yes in"+req.query.keywords.length);
 						var more=true;
@@ -108,6 +108,7 @@ router.get('/list', function(req, res) {
 								more=false;
 
 							}
+							console.log("eeee"+err+"eee");
 				    //res.json({ "results" :JSON.stringify(results)});
 				     res.json({ "results" :results.hits,"more":more});
 				});
