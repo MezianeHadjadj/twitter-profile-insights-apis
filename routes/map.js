@@ -68,6 +68,8 @@ elasticSearchClient.search({
 
 						for( var i = 0,length = crawlers.length; i < length; i++ ) {
 								//console.log(i+crawlers[i]["key"]+"oo");
+							
+							if(crawlers[i]["key"]!="the" & crawlers[i]["key"]!="everywhere" & crawlers[i]["key"]!="1"){
 							if (i+1==crawlers.length){
 								finish=true;
 								console.log("true");
@@ -76,7 +78,7 @@ elasticSearchClient.search({
 							MapEngine.location_function(crawlers,i,
 								finish,res);
 							
-
+						}
 
 						//while(i<crawlers.length){	
 						 	//var address = '885 6th Ave #15D New York, NY 10001';
