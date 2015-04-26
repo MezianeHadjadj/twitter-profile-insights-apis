@@ -63,9 +63,10 @@ router.get('/list', function(req, res) {
 	//q2=q2+')'+'OR ( text :'+[keywords[keywords.length-1].split(" ")][0]
 	// console.log("qqqqqqqqqqqqqqq"+q2+"qqqqqqqq");
 	// console.log("text: قطر AND text: أودي");
-
+	var language="en OR ar" ;
 	if(req.query.language){
 		q2='(language: '+req.query.language+') AND ' +'('+q2+')';
+		language=req.query.language;
 	}
 	// if(req.query.location){
 	// 	q2='(location: '+req.query.language+') AND ' +q2;
@@ -73,29 +74,37 @@ router.get('/list', function(req, res) {
 	var res_source=res;
 	var elastical = require('elastical');
 	var client = new elastical.Client('104.197.12.112', {port: 9200});
-	if(q2.indexOf("?")!=-1&req.query.keywords.length==1){
+	if(q2.indexOf("?")!=-1&req.query.keywords.length==14){
 						console.log("yes in"+req.query.keywords.length);
 						var more=true;
+						console.log("ln"+req.query.language);
 					client.search({
 						index: 'twitter',
 						  size: req.query.limit,
 						 // size: 10,
 						  type: 'posts',
 						  from: from,
-				    // query: {
-				    	
-						  
-						  
-				    // 	query_string: {
-
-				    // 		query: 'crm ?'}
-				    // },
-
+					query: {match_all: {}  },
 				    query : {
 				        filtered : {
-				            query:   { "match": { "keywords": req.query.keywords[0] }}
+				           
+				            query: [ 
+
+				             { "match":
+				              { "keywords": req.query.keywords[0]  }
+
+				          	}
+				            
+				            ]
+				            
+
+				        	
 				        }
 				    },
+
+
+
+				   
 
 				    sort: 
 				    	{ "id":   { "order": "desc" }},
@@ -103,15 +112,22 @@ router.get('/list', function(req, res) {
 
 
 				}, function (err, results) {
-					
+					console.log(JSON.stringify(err)+"dd"+JSON.stringify(results));
 					if (JSON.stringify(results.hits.total)==0){
 								more=false;
 
 							}
 							console.log("eeee"+err+"eee");
-				    //res.json({ "results" :JSON.stringify(results)});
 				     res.json({ "results" :results.hits,"more":more});
 				});
+	
+
+				
+
+
+
+
+
 	}
 	else{
 					var more=true;
@@ -139,6 +155,13 @@ router.get('/list', function(req, res) {
 
 	}
 
+
+});
+
+
+
+router.get('/test_toptal', function(req, res) {
+console.log("test");
 
 });
 

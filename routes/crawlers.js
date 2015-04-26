@@ -290,6 +290,46 @@ router.get('/check', function(req, res) {
 	console.log("yes checked");
   res.send('check', "({ title: 'check' });");
 });
+
+
+
+
+/* delete existing crawler */
+router.get('/delete_crawler', function(req, res) {
+	keyword=req.query.keyword
+//delete crawler
+elasticSearchClient.deleteByQuery({
+					  index: 'twitter',
+					  type: 'crawlers',
+					  q: 'keyword: '+keyword
+					 // body: {
+				  //   query: {
+				  //     term: { keyword: keyword }
+				  //   }
+				  // }
+					}) .then(function (resp) {
+						twitterCrawler.currentStream.stop();
+						setTimeout(function(){ CrawlerEngine.launchCrawlers(); }, 500);
+						
+							console.log("yesss");
+				},function (error, response) {
+					  console.log("erorr:"+error+JSON.stringify(response));
+					});
+
+//delete related tweets
+elasticSearchClient.deleteByQuery({
+								  index: 'twitter',
+								  type:'posts',
+						 		 q: 'keywords: '+keyword
+								}, function (error, response) {
+								  console.log("###########"+error+response+" ####");
+									res.send('delete', "deleted");
+								});
+
+
+
+});
+
 /* delete existing crawler */
 router.get('/delete', function(req, res) {
 
@@ -301,6 +341,7 @@ router.get('/delete', function(req, res) {
 			  q: 'keyword: '+ req.query.keyword
 			}).then(function (resp) {
 				//console.log("ressss"+JSON.stringify(resp.hits.hits[0]._source.organization));
+				console.log("ii"+JSON.stringify(resp.hits.hits[0]._source));
 				var organizations=resp.hits.hits[0]._source.organization;
 
 				if (organizations.length==1){
@@ -330,13 +371,15 @@ router.get('/delete', function(req, res) {
 					// 	}, function (error, response) {
 					// 	  siz=siz+response["count"]/50;
 
-						  // elasticSearchClient.deleteByQuery({
-								//   index: 'twitter',
-								//   type:'posts',
-						 	// 	 q: 'keywords: '+keyword
-								// }, function (error, response) {
-								//   console.log("###########"+error+response+" ####");
-								// });
+					elasticSearchClient.deleteByQuery({
+								  index: 'twitter',
+								  type:'posts',
+						 		 q: 'keywords: '+req.query.keyword
+								}, function (error, response) {
+								  console.log("###########"+error+response+" ####");
+									res.send('delete', "deleted");
+								});
+						 
 						  
 
 					// 		res.send('update', { title: 'Deleted' });
@@ -386,6 +429,27 @@ router.get('/delete', function(req, res) {
 
 
 });
+//delete crawler by id
+router.get('/delete_id', function(req, res) {
+	orga=req.query.orga
+	 elasticSearchClient.deleteByQuery({
+					  index: 'twitter',
+					  type: 'crawlers',
+					  q: 'organization: '+orga
+					 // body: {
+				  //   query: {
+				  //     term: { keyword: keyword }
+				  //   }
+				  // }
+					}) .then(function (resp) {
+						twitterCrawler.currentStream.stop();
+						setTimeout(function(){ CrawlerEngine.launchCrawlers(); }, 500);
+						
+							console.log("yesss");
+				},function (error, response) {
+					  console.log("erorr:"+error+JSON.stringify(response));
+					});
+	});
 router.get('/dell', function(req, res) {
 
 // var geocoderProvider = 'google';
