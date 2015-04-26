@@ -291,7 +291,11 @@ router.get('/check', function(req, res) {
   res.send('check', "({ title: 'check' });");
 });
 
-
+/* restart crawlers*/
+router.get('/restart_crawlers', function(req, res) {
+twitterCrawler.currentStream.stop();
+setTimeout(function(){ CrawlerEngine.launchCrawlers(); }, 500);
+});
 
 
 /* delete existing crawler */
