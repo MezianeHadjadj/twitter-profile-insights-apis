@@ -5,41 +5,14 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-
-
-var posts = require('./routes/posts');
+var routes = require('./routes/index');
+var users = require('./routes/users');
 
 var app = express();
-console.log("yes");
-app.listen(5000)
-// view engine setup
-
-
-
-var swig         = require('swig');
 
 // view engine setup
-// utilisation du moteur de swig pour les .html
-app.engine('html', swig.renderFile); 
-// utiliser le moteur de template pour les .html
-app.set('view engine', 'html'); 
-// dossier des vues
-app.set('views', path.join(__dirname, 'views')); 
-
-// view cache
-app.set('view cache', false); // désactivation du cache express
-swig.setDefaults({ cache: false }); // désactivation du cache swig
-
-
-
-
-// app.get('/hi', function(req, res) {
-//     res.send('Hello Worlzz');
-    
-// });
-
-// app.engine('html', require('ejs').renderFile);
-// app.set('view engine', 'html');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -49,8 +22,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//app.use('/', routes);
-app.use('/', posts);
+app.use('/', routes);
+app.use('/users', users);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');

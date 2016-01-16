@@ -1,256 +1,130 @@
 var express = require('express');
-var elasticsearch = require('elasticsearch');
-var elasticSearchClient = new elasticsearch.Client({
-	host: '104.197.12.112:9200',
-	log: 'trace'
-});
+
 var router = express.Router();
 var ParserEngine = {};
 
-/* get details of tweets */
-router.get('/tweet_details', function(req, res) {
-		tweet_id=req.query.tweet_id;
-		console.log(tweet_id);
+var Twitter = require('node-twitter');
 
-		  elasticSearchClient.search({
-		  index: 'twitter',
-		  size: 1,
-		  type: 'posts',		  
-		  q:"id: "+tweet_id
-		}).then(function (resp) {
-			
-			
 
-			 res.json({ "results" :resp.hits.hits});
-		}, function (err) {
-		     console.trace(err.message);
+router.get('/details', function(req, res) {
+
+
+		var Twitter = require('twitter');
+ 
+		var client = new Twitter({
+		  consumer_key: 'n4h3onsHHB6B9MdiPTbuU3zvf',
+		  consumer_secret: 'Hugy2DD3kZXvAVg2MFXIL2506Rzk1qiRIPvGbuvnZVWkywxC2N',
+		  access_token_key: '1157418127-VdrrfNdZi3hXs7GqSrRRHbplY2bZUqe388gFBQ2',
+		  access_token_secret: 'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
 		});
 
-		
-});
-//Pay attention actually there are a diff when listing for crm and "crm ?" is about and...
-/* list existing crawlers */
-router.get('/list', function(req, res) {
-	
-	//var result=ParserEngine.listTweets(params);
-	console.log(typeof req.query.keywords);
-	var from=(req.query.page-1)*req.query.limit;
-// list tweets from elasticsearch nodes
-	var language="";
-	var keywords=req.query.keywords;
-	var q2=""
-	for( var i = 0,length = keywords.length; i < length; i++ ) {
+		var results={};
+		var hashtags=[];
+		var popular={};
+		var params = {screen_name: req.param('screen_name'),count: 10};
+		client.get('statuses/user_timeline', params, function(error, tweets, response){
+		  if (!error) {
+		  	//get a picture
+		  	results["profile_image"]=tweets[0]["user"]["profile_image_url_https"]
+			for (var i=0, length=tweets.length; i<length; i++ ){
+				popular[""+i]=tweets[i]["retweet_count"]+tweets[i]["favorite_count"]
+				for ( var j=0, size=tweets[i]["entities"]["hashtags"].length; j<size; j++ ){
+					hashtags.push(tweets[i]["entities"]["hashtags"][j]["text"])
+					}			
+			}
+			//sort popular tweets:
+			var sortable_popular=[];
+			for (var twt in popular)
+		      sortable_popular.push([twt, popular[twt]])
+			sortable_popular.sort(function(a, b) {return a[1] - b[1]})
+			sortable_popular=sortable_popular.reverse()
+			results["popular_tweets"]=sortable_popular
+			for (var ele in sortable_popular)
+			{
+				console.log(sortable_popular[ele][0]+"de")
+				results["popular_tweets"].push(tweets[sortable_popular[ele][0]])
+			}
+			//count hashtags 
+			hashtags_counted = {}
+			hashtags.forEach(function(obj) {
+			    var key =obj
+			    hashtags_counted[key] = (hashtags_counted[key] || 0) + 1
+			})
+			//sort hashtags
+			var sortable_hashtags = [];
 
-		//console.log(crawlerr.CrawlerEngine.testt()+"cra");
-		console.log("require:"+require('./crawlers'));
-
-		 q2=q2+ '(text: '+keywords[i].split(" ")[0]
-		words=keywords[i].split(" ")
-		for (var j = 1,lengthj = words.length; j < lengthj; j++ ){
+			for (var vehicle in hashtags_counted)
+			      sortable_hashtags.push([vehicle, hashtags_counted[vehicle]])
+			sortable_hashtags.sort(function(a, b) {return a[1] - b[1]})
+			results["popular_hashtags"]=sortable_hashtags.reverse()
 			
-			q2=q2+' AND text: '+words[j]
-		}
-		if (i+1!=length){
-			q2=q2+" ) OR " ;
-		}else{
-			q2=q2+' )'
-		}
-
-		
-	}
-	
-	
-	//q2=q2+')'+'OR ( text :'+[keywords[keywords.length-1].split(" ")][0]
-	// console.log("qqqqqqqqqqqqqqq"+q2+"qqqqqqqq");
-	// console.log("text: قطر AND text: أودي");
-	var language="en OR ar" ;
-	if(req.query.language){
-		q2='(language: '+req.query.language+') AND ' +'('+q2+')';
-		language=req.query.language;
-	}
-	// if(req.query.location){
-	// 	q2='(location: '+req.query.language+') AND ' +q2;
-	// }
-	var res_source=res;
-	var elastical = require('elastical');
-	var client = new elastical.Client('104.197.12.112', {port: 9200});
-	if(q2.indexOf("?")!=-1&req.query.keywords.length==14){
-						console.log("yes in"+req.query.keywords.length);
-						var more=true;
-						console.log("ln"+req.query.language);
-					client.search({
-						index: 'twitter',
-						  size: req.query.limit,
-						 // size: 10,
-						  type: 'posts',
-						  from: from,
-					query: {match_all: {}  },
-				    query : {
-				        filtered : {
-				           
-				            query: [ 
-
-				             { "match":
-				              { "keywords": req.query.keywords[0]  }
-
-				          	}
-				            
-				            ]
-				            
-
-				        	
-				        }
-				    },
-
-
-
-				   
-
-				    sort: 
-				    	{ "id":   { "order": "desc" }},
-				    
-
-
-				}, function (err, results) {
-					console.log(JSON.stringify(err)+"dd"+JSON.stringify(results));
-					if (JSON.stringify(results.hits.total)==0){
-								more=false;
-
-							}
-							console.log("eeee"+err+"eee");
-				     res.json({ "results" :results.hits,"more":more});
-				});
-	
-
-				
-
-
-
-
-
-	}
-	else{
-					var more=true;
-					elasticSearchClient.search({
-						  index: 'twitter',
-						  size: req.query.limit,
-						  //size: 4,
-						  sort : 'id:desc',
-						  type: 'posts',
-						  from: from,
-						  q: q2
-						 //q: "(text: للمجوهرات AND text: قطر AND text: معرض) OR (text: قطر AND text: أودي)  "
-						 // q: "text: قطر AND text: أودي"
-						}).then(function (resp) {
-							
-							if (JSON.stringify(resp.hits.total)==0){
-								more=false;
-
-							}
-
-							 res.json({ "results" :resp.hits.hits,"more":more});
-						}, function (err) {
-						     console.trace(err.message);
-						});
-
-	}
-
-
-});
-
-
-
-router.get('/test_toptal', function(req, res) {
-console.log("test");
-
-});
-
-
-
-router.get('/total_number_tweets', function(req, res) {
-elasticSearchClient.count({
-			  index: 'twitter',
-			  type:'posts'
-			 
-			}, function (error, response) {
-			  
-			  
-					res.render('crawlers', { crawlers: response});
-				
-			
-			});
-});
-
-router.get('/delete_duplicate_tweets', function(req, res) {
-
-
-
-
-
-		elasticSearchClient.search({
-					  index: 'twitter',
-					  
-					  type: 'posts',
-					  body: {
-
-					aggs: {
-			                touchdowns: {
-			                    terms: {
-			                    	size:400,
-			                        field: "id",
-			                        // order by quarter, ascending
-			                        order: { "_term" : "desc" }
-			                    }
-			                }
-			            }
-			           }
-					}).then(function (resp) {
-						results=resp.aggregations.touchdowns.buckets
-						//console.log(results[0]["doc_count"]+"ddddddddddd");
-						 for( var i = 0,length = results.length; i < length; i++ ) {
-						 	console.log(results[i]["doc_count"]);
-						 	if(results[i]["doc_count"]>1){
-
-						 		res.json({ "results" :results[i]});
-						 		break
-						 	}
-						 }
-						 
-							
-					}, function (err) {
-					     console.trace(err.message);
-					});
-
-
-
-
-
-
-
-
-		// elasticSearchClient.search({
-		//   index: 'twitter',
-
-		//   type: 'posts',
-
-		//   q: "id: "+req.query.id
-		//  //q: "(text: للمجوهرات AND text: قطر AND text: معرض) OR (text: قطر AND text: أودي)  "
-		//  // q: "text: قطر AND text: أودي"
-		// }).then(function (resp) {
+			//Overview of profile
 			
 
+			res.json({ "results" :results});
+		  }
+		});
 
-		// 	}
 
-		// 	 res.json({ "results" :resp.hits.hits,"more":more});
-		// }, function (err) {
-		//      console.trace(err.message);
+		//search on tweets
+		// client.get('search/tweets', {q: 'Hadjadj'}, function(error, tweets, response){
+		//    console.log("deee"+JSON.stringify(tweets));
 		// });
 
 
+		 // get tweets
+		// var params = {screen_name: 'MezianeHadjadj',count: 3};
+		// client.get('statuses/user_timeline', params, function(error, tweets, response){
+		//   if (!error) {
+		//   	console.log("jj"+JSON.stringify(tweets));
+		//   }
+		// });
 
 
+		
+
+
+
+
+	// var twitterSearchClient = new Twitter.SearchClient(
+ //    'n4h3onsHHB6B9MdiPTbuU3zvf',
+ //    'Hugy2DD3kZXvAVg2MFXIL2506Rzk1qiRIPvGbuvnZVWkywxC2N',
+ //    '1157418127-VdrrfNdZi3hXs7GqSrRRHbplY2bZUqe388gFBQ2',
+ //    'LCmHESrWFKvhAmLM9FhO5CaN3V90n8O6W9EjAJT2va9B0'
+	// );
+	// twitterSearchClient.search({'q': "MezianeHadjadj",'count':1}, function(error, result) {
+	//     if (error)
+	//     {
+	//         console.log('Error: ' + (error.code ? error.code + ' ' + error.message : error.message));
+	//     }
+	 
+	//     if (result)
+	//     {
+	//     	console.log(JSON.stringify(result));
+	//     			console.log("lennnn"+result["statuses"].length+"nellll");
+
+	// 		      for(var i=0, length=result["statuses"].length;i<length;i++){
+	// 		      			tweet=result["statuses"][i];
+	// 		      			console.log("################"+JSON.stringify(tweet));
+			      			
+	    	      					
+
+
+	// 		      }
+
+	//     }
+	// });
+
+			
+	//	console.log(req.param('twitter_id'));
+
+		
+				
+		//res.render('index', { title: 'Welcome' });
+		
 });
+
+
 
 
 module.exports = router;
