@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 
 var posts = require('./routes/posts');
 
+var linkedin_details= require('./routes/linkedin_details');
 var app = express();
 console.log("yes");
 app.listen(5000)
@@ -51,6 +52,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 //app.use('/', routes);
 app.use('/', posts);
+app.use('/', linkedin_details);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');

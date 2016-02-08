@@ -1,25 +1,11 @@
 import sys, json
 from elasticsearch import Elasticsearch
-es = Elasticsearch(host= '104.154.66.240',port=9200)
-# # simple JSON echo script
-
-# text=""
-
-# for line in sys.stdin:
-#   text=text+line
-# #print text,"first"
-# if str(text)=='hello':
-# 	print "yesss"
-# #print "message sent from python"
-
-
-
-
-
-
-
 import re
 import math
+es = Elasticsearch(host= '104.154.66.240',port=9200)
+
+
+
 #get words of sentence
 def getwords(doc):
 	splitter=re.compile('\\W*')
@@ -39,7 +25,6 @@ class classifier:
 
 		training_stats =es.search(index="twitter",doc_type="training_stats", body={"query": {"match_all": {}}})
 		#training_stats =es.delete(index="twitter",doc_type="training_stats", id="AUvEw6l--WcpkF1rYNLk")
-		#print "#############",training_stats["hits"]["hits"][0]["_source"]["fc"],"#############"
 		#training_stats["hits"]["hits"][0]["_source"]["fc"]
 		# Counts of feature/category combinations
 		
@@ -50,7 +35,6 @@ class classifier:
 			self.fc=training_stats["hits"]["hits"][0]["_source"]["fc"]
 			# Counts of documents in each category
 			self.cc=training_stats["hits"]["hits"][0]["_source"]["cc"]
-		#print getfeatures,"gfffffffffff"
 		self.getfeatures=getfeatures
 
 
@@ -85,11 +69,7 @@ class classifier:
 		return self.cc.keys()
 
 	def train(self,item,cat):
-		#print item,cat
 		features=self.getfeatures(item)
-		#print features,"fffffff"
-		#print features,"fff"
-		# Increment the count for every feature with this category
 		for f in features:
 			self.incf(f,cat)
 		# Increment the count for this category
@@ -120,8 +100,6 @@ class classifier:
 		if self.catcount(cat)==0: return 0
 		# The total number of times this feature appeared in this
 		# category divided by the total number of items in this category
-		print "fff",f, "ccc",cat
-		print self.fcount(f,cat),"/////////",self.catcount(cat)
 		return self.fcount(f,cat)/self.catcount(cat)
 	def weightedprob(self,f,cat,prf,weight=1.0,ap=0.5):
 		# Calculate current probability
@@ -173,20 +151,3 @@ if kind.strip()=="predict":
 		global_weight=global_weight+spamprob
 
 	print global_weight/len(text_features), "is a spam"
-#cl.train('this is a robot ','spam')
-
-#cl.train('mobile','spam')
-#cl.store_train()
-#text.strip()
-#weightedprob=cl.weightedprob("mobile",'spam',cl.fprob)
-#print weightedprob,"weightedprob"
-#prob=cl.fprob('money','good')
-#print "prob is:", prob
-#print cl.__dict__
-#cl.train('the quick brown fox jumps over the lazy dog','good')
-#print cl.categories()
-#catcount=cl.catcount("good")
-#print catcount,"cattt"
-#cl.train('make quick money in the online casino','bad')
-#fcount=cl.fcount('brown','good')
-#print fcount,"fcountt"

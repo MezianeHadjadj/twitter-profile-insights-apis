@@ -18,5 +18,8 @@
     "transformers": "^3.1.0",
     "void-elements": "^2.0.1",
     "with": "^4.0.1"
+  },
+  "devDependencies": {
+    "frisby": "^0.8.5"
   }
 }

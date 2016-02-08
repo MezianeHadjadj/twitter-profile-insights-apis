@@ -21,7 +21,7 @@ router.get('/details', function(req, res) {
 		var results={};
 		var hashtags=[];
 		var popular={};
-		var params = {screen_name: req.param('screen_name'),count: 10};
+		var params = {screen_name: req.param('screen_name'),count: 5};
 		client.get('statuses/user_timeline', params, function(error, tweets, response){
 		  if (!error) {
 		  	//get a picture
