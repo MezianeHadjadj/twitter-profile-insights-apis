@@ -4,7 +4,16 @@ var router = express.Router();
 var ParserEngine = {};
 
 var Twitter = require('node-twitter');
+Popular_Tweets=function(popular){
 
+	var sortable_popular=[];
+	for (var twt in popular)
+		sortable_popular.push([twt, popular[twt]])
+	sortable_popular.sort(function(a, b) {return a[1] - b[1]})
+
+	return sortable_popular.reverse();
+
+}
 Popular_Hashtags=function(hashtags){
 	var popular_hashtags=[];
 
@@ -50,17 +59,14 @@ router.get('/details', function(req, res) {
 					}			
 			}
 			//sort popular tweets:
-			var sortable_popular=[];
-			for (var twt in popular)
-		      sortable_popular.push([twt, popular[twt]])
-			sortable_popular.sort(function(a, b) {return a[1] - b[1]})
-			sortable_popular=sortable_popular.reverse()
+
+			var sortable_popular=Popular_Tweets(popular)
 			results["popular_tweets"]=sortable_popular
 			for (var ele in sortable_popular)
 			{
-				console.log(sortable_popular[ele][0]+"de")
 				results["popular_tweets"].push(tweets[sortable_popular[ele][0]])
 			}
+
 			//count hashtags
 			results["popular_hashtags"]=Popular_Hashtags(hashtags);
 			
