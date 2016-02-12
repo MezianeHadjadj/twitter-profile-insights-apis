@@ -12,7 +12,7 @@ var posts = require('./routes/posts');
 var linkedin_details= require('./routes/linkedin_details');
 var app = express();
 console.log("yes");
-app.listen(5000)
+app.listen(5000);
 // view engine setup
 
 

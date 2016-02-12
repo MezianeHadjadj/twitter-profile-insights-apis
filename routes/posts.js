@@ -5,7 +5,23 @@ var ParserEngine = {};
 
 var Twitter = require('node-twitter');
 
+Popular_Hashtags=function(hashtags){
+	var popular_hashtags=[];
 
+	hashtags_counted = {}
+	hashtags.forEach(function(obj) {
+		var key =obj
+		hashtags_counted[key] = (hashtags_counted[key] || 0) + 1
+	})
+	//sort hashtags
+	var sortable_hashtags = [];
+
+	for (var hash in hashtags_counted)
+		sortable_hashtags.push([hash, hashtags_counted[hash]])
+	sortable_hashtags.sort(function(a, b) {return a[1] - b[1]})
+	popular_hashtags=sortable_hashtags.reverse()
+	return popular_hashtags;
+}
 router.get('/details', function(req, res) {
 
 
@@ -26,6 +42,7 @@ router.get('/details', function(req, res) {
 		  if (!error) {
 		  	//get a picture
 		  	results["profile_image"]=tweets[0]["user"]["profile_image_url_https"]
+			//get tweets and hashtags
 			for (var i=0, length=tweets.length; i<length; i++ ){
 				popular[""+i]=tweets[i]["retweet_count"]+tweets[i]["favorite_count"]
 				for ( var j=0, size=tweets[i]["entities"]["hashtags"].length; j<size; j++ ){
@@ -44,19 +61,8 @@ router.get('/details', function(req, res) {
 				console.log(sortable_popular[ele][0]+"de")
 				results["popular_tweets"].push(tweets[sortable_popular[ele][0]])
 			}
-			//count hashtags 
-			hashtags_counted = {}
-			hashtags.forEach(function(obj) {
-			    var key =obj
-			    hashtags_counted[key] = (hashtags_counted[key] || 0) + 1
-			})
-			//sort hashtags
-			var sortable_hashtags = [];
-
-			for (var vehicle in hashtags_counted)
-			      sortable_hashtags.push([vehicle, hashtags_counted[vehicle]])
-			sortable_hashtags.sort(function(a, b) {return a[1] - b[1]})
-			results["popular_hashtags"]=sortable_hashtags.reverse()
+			//count hashtags
+			results["popular_hashtags"]=Popular_Hashtags(hashtags);
 			
 			//Overview of profile
 			
