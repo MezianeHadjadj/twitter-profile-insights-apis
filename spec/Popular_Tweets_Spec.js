@@ -5,7 +5,7 @@ var posts=require("../routes/posts.js");
 
 var popular_tweets=null;
 
-describe("Twitter insights API", function() {
+describe("Twitter insights Popular Tweets API", function() {
     describe("GET /", function() {
         //Testing Popular Tweets function
 

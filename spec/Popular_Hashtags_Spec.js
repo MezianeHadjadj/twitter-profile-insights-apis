@@ -3,14 +3,13 @@ var app_file = require("../app.js")
 var base_url = "http://localhost:5000/"
 var posts=require("../routes/posts.js");
 var popular_hashtags=null;
-var popular_tweets=null;
 
-describe("Twitter insights API", function() {
+
+describe("Twitter insights  Popular Hashtags API", function() {
     describe("GET /", function() {
         it("returns status code 200", function(done) {
             request.get(base_url+"details", function(error, response, body) {
                 expect(response.statusCode).toBe(200);
-                app_file.closeServer();
                 done();
             });
         });
