@@ -50,5 +50,6 @@ router.get('/search_linkedin_profile', function(req, res){
     })
 });
 
-console.log('scraping LinkedIn Data');
+//console.log('scraping LinkedIn Data');
 exports = module.exports = router;
+//module.exports = router;
