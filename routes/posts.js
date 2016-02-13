@@ -6,39 +6,39 @@ var Twitter = require('node-twitter');
 
 
 
-function test (){
-	return "test";
+global.test=function  (){
+	return "test_api";
 }
 
-Popular_Tweets=function(popular){
+global.Popular_Tweets=function(popular){
 	console.log(popular)
 	var sortable_popular=[];
 	for (var twt in popular)
 		sortable_popular.push([twt, popular[twt]])
 	sortable_popular.sort(function(a, b) {return a[1] - b[1]})
-	console.log(sortable_popular.reverse())
+	//console.log(sortable_popular.reverse())
 	return sortable_popular.reverse();
 
 }
-Popular_Hashtags=function(hashtags){
-	console.log(hashtags)
-	var popular_hashtags=[];
+global.Popular_Hashtags=function(hashtags) {
+	var popular_hashtags = [];
 
 	hashtags_counted = {}
-	hashtags.forEach(function(obj) {
-		var key =obj
-		hashtags_counted[key] = (hashtags_counted[key] || 0) + 1
-	})
+
+	for (ele in hashtags) {
+		hashtags_counted[hashtags[ele]] = (hashtags_counted[hashtags[ele]] || 0) + 1
+	};
 	//sort hashtags
 	var sortable_hashtags = [];
 
-	for (var hash in hashtags_counted)
+	for (var hash in hashtags_counted){
 		sortable_hashtags.push([hash, hashtags_counted[hash]])
+	}
 	sortable_hashtags.sort(function(a, b) {return a[1] - b[1]})
+
 	popular_hashtags=sortable_hashtags.reverse()
-	console.log(popular_hashtags)
 	return popular_hashtags;
-}
+};
 router.get('/details', function(req, res) {
 
 
@@ -54,7 +54,7 @@ router.get('/details', function(req, res) {
 		var results={};
 		var hashtags=[];
 		var popular={};
-		var params = {screen_name: req.param('screen_name'),count: 5};
+		var params = {screen_name: req.param('screen_name'),count: 10};
 		client.get('statuses/user_timeline', params, function(error, tweets, response){
 		  if (!error) {
 		  	//get a picture
@@ -68,7 +68,7 @@ router.get('/details', function(req, res) {
 			}
 			//sort popular tweets:
 
-			var sortable_popular=Popular_Tweets(popular)
+			var sortable_popular=global.Popular_Tweets(popular)
 			results["popular_tweets"]=sortable_popular
 			for (var ele in sortable_popular)
 			{
@@ -76,7 +76,7 @@ router.get('/details', function(req, res) {
 			}
 
 			//count hashtags
-			results["popular_hashtags"]=Popular_Hashtags(hashtags);
+			results["popular_hashtags"]=global.Popular_Hashtags(hashtags);
 			
 			//Overview of profile
 			
