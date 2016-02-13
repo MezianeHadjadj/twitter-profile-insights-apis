@@ -3,6 +3,7 @@ var app_file = require("../app.js")
 var base_url = "http://localhost:5000/"
 var posts=require("../routes/posts.js");
 var popular_hashtags=null;
+var popular_tweets=null;
 
 describe("Twitter insights API", function() {
     describe("GET /", function() {

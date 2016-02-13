@@ -11,12 +11,10 @@ global.test=function  (){
 }
 
 global.Popular_Tweets=function(popular){
-	console.log(popular)
 	var sortable_popular=[];
 	for (var twt in popular)
 		sortable_popular.push([twt, popular[twt]])
 	sortable_popular.sort(function(a, b) {return a[1] - b[1]})
-	//console.log(sortable_popular.reverse())
 	return sortable_popular.reverse();
 
 }
@@ -54,7 +52,7 @@ router.get('/details', function(req, res) {
 		var results={};
 		var hashtags=[];
 		var popular={};
-		var params = {screen_name: req.param('screen_name'),count: 10};
+		var params = {screen_name: req.param('screen_name'),count: 5};
 		client.get('statuses/user_timeline', params, function(error, tweets, response){
 		  if (!error) {
 		  	//get a picture
