@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', posts);
 app.use('/', linkedin_details);
 
-console.log("working on get_last_tweet feature branch");
+console.log("working on get_last_tweets feature from develo branch");
 
 var server = app.listen(5000, function(){
     console.log('Launching Twitter insights server on port 3000');
