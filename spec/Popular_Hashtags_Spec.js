@@ -15,18 +15,18 @@ describe("Twitter insights  Popular Hashtags API", function() {
         });
         //Testing Popular Hashtags function
         it("Popular Hashtags should return ordered result", function(done){
-            popular_hashtags=Popular_Hashtags(["startup", "twitter","startup"]);
+            popular_hashtags = Popular_Hashtags(["startup", "twitter","startup"]);
             expect(String(popular_hashtags)).toBe("startup,2,twitter,1")
             done();
         });
         it("Popular Hashtags should return ordered array", function(done){
-            popular_hashtags=Popular_Hashtags(["google"]);
+            popular_hashtags = Popular_Hashtags(["google"]);
            expect(String(popular_hashtags)).toBe("google,1")
            done();
         });
 
         it("Popular Hashtags should return ordered array", function(done){
-            popular_hashtags=Popular_Hashtags([]);
+            popular_hashtags = Popular_Hashtags([]);
             expect(String(popular_hashtags)).toBe("")
             app_file.closeServer();
             done();
