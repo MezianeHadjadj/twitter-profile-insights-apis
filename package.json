@@ -5,9 +5,9 @@
   "scripts": {
     "start": "node ./bin/www",
     "test": "jasmine-node spec"
-
   },
   "dependencies": {
+    "asserts": "^4.0.2",
     "body-parser": "~1.10.2",
     "character-parser": "^1.2.2",
     "constantinople": "^3.0.1",
@@ -16,6 +16,7 @@
     "express": "~4.11.1",
     "jade": "^1.9.2",
     "jasmine-node": "^1.14.5",
+    "konfu": "^1.2.0",
     "morgan": "~1.5.1",
     "request": "^2.69.0",
     "serve-favicon": "~2.2.0",

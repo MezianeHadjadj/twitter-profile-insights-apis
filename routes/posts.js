@@ -3,10 +3,11 @@ var express = require('express');
 var router = express.Router();
 var ParserEngine = {};
 var Twitter = require('node-twitter');
-var config=require("konfu");
 
+var config = require('konfu');
 
-global.test=function  (){
+global.test = function () {
+
 	return "test_api";
 }
 
@@ -21,7 +22,7 @@ global.Popular_Tweets=function(popular){
 global.Popular_Hashtags=function(hashtags) {
 	var popular_hashtags = [];
 
-	hashtags_counted = {}
+	hashtags_counted = {};
 
 	for (ele in hashtags) {
 		hashtags_counted[hashtags[ele]] = (hashtags_counted[hashtags[ele]] || 0) + 1
@@ -42,12 +43,14 @@ router.get('/details', function(req, res) {
 
 		var Twitter = require('twitter');
 
-	var client = new Twitter({
-		consumer_key: config.consumer_key,
-		consumer_secret: config.consumer_secret,
-		access_token_key: config.access_token_key,
-		access_token_secret: config.access_token_secret
-	});
+ 
+		var client = new Twitter({
+		  consumer_key: config.consumer_key,
+		  consumer_secret: config.consumer_secret,
+		  access_token_key: config.access_token_key,
+		  access_token_secret: config.access_token_secret
+		});
+
 
 		var results={};
 		var hashtags=[];
@@ -80,6 +83,8 @@ router.get('/details', function(req, res) {
 			
 
 			res.json({ "results" :results});
+		  }else{
+			  console.log("error:"+error);
 		  }
 		});
 
