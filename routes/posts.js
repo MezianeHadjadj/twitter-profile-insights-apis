@@ -5,7 +5,14 @@ var ParserEngine = {};
 var Twitter = require('node-twitter');
 var config=require("konfu");
 
-
+var raven = require('raven');
+var client = new raven.Client('https://f7a9731801754c73ab93218e3415c798:76a60223f15a40069a8d9eb6dd0c98dc@app.getsentry.com/67675');
+client.patchGlobal();
+try {
+	var i=z/0;
+} catch(e) {
+	client.captureException(e)
+}
 global.test=function  (){
 	return "test_api";
 }

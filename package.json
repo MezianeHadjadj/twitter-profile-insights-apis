@@ -5,7 +5,6 @@
   "scripts": {
     "start": "node ./bin/www",
     "test": "jasmine-node spec"
-
   },
   "dependencies": {
     "body-parser": "~1.10.2",
@@ -17,6 +16,7 @@
     "jade": "^1.9.2",
     "jasmine-node": "^1.14.5",
     "morgan": "~1.5.1",
+    "raven": "^0.10.0",
     "request": "^2.69.0",
     "serve-favicon": "~2.2.0",
     "transformers": "^3.1.0",

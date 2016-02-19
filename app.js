@@ -17,10 +17,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', posts);
 app.use('/', linkedin_details);
 
+
+
 console.log("working on get_last_tweet feature branch");
 
-var server = app.listen(5001, function(){
-    console.log('Launching Twitter insights server on port 3000');
+var server = app.listen(5002, function(){
+    console.log('Launching Twitter insights server on port 5002');
 });
 
 var swig         = require('swig');
