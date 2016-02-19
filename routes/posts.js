@@ -3,9 +3,11 @@ var express = require('express');
 var router = express.Router();
 var ParserEngine = {};
 var Twitter = require('node-twitter');
+
 var config = require('konfu');
 
 global.test = function () {
+
 	return "test_api";
 }
 
@@ -40,6 +42,7 @@ router.get('/details', function(req, res) {
 
 
 		var Twitter = require('twitter');
+
  
 		var client = new Twitter({
 		  consumer_key: config.consumer_key,
@@ -47,6 +50,7 @@ router.get('/details', function(req, res) {
 		  access_token_key: config.access_token_key,
 		  access_token_secret: config.access_token_secret
 		});
+
 
 		var results={};
 		var hashtags=[];

@@ -20,8 +20,9 @@ app.use('/', linkedin_details);
 
 
 
-var server = app.listen(5000, function(){
-    console.log('Launching Twitter insights server on port 5000');
+var server = app.listen(5002, function(){
+    console.log('Launching Twitter insights server on port 5002');
+
 });
 
 var swig         = require('swig');
